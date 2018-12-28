@@ -785,6 +785,65 @@ uni.stopPullDownRefresh()
 ]
 
 第25讲 : uni-app 上拉加载更多
+（完整代码示例在线预览，这里不做展示）
+
 第26讲 : uni-app 第三方登录（小程序篇）
+小程序端必须配置 app id。获取appid后编辑 manifest.json :
+"mp-weixin" : {
+    "appid" : "您的app id"
+}
+接口地址：https://developers.weixin.qq.com/miniprogram/dev/api/open.html#wxgetuserinfoobject
+app 端必须的配置，app 端支持微信、qq、微博等多种登录方式。
+开发者并获取对应的 appid。获取后打开 manifest 可视化操作填写即可。
+
 第27讲 : uni-app 登录（h5+ app 篇）
+（完整代码示例在线预览，这里不做展示）
+
 第28讲 : 自定义组件创建及使用
+创建自定义组件：
+1、新建 组件.vue 文件
+2、组件文档结构
+<template name="组件名称">
+	<view>
+	    ......
+	</view>
+</template>
+<script>
+export default {
+	name: "组件名称",
+	//属性
+	props: {
+		属性名称: {
+			type: String,//属性类型
+			value: "值"
+		},
+		......
+	},
+	//组件生命周期
+	created:function(e){
+	
+	},
+	methods: {
+		函数名称:function(obj){
+		
+		},
+	}
+}
+</script>
+<style>
+	组件样式
+</style>
+
+使用组件：
+1、引用组件
+import 组件名称 from "../../components/组件名.vue";
+2、注册组件
+export default{
+	components:{
+		组件名称
+	},
+}
+3、在试图模板中使用组件
+<组件名称 组件属性="对应的值"></组件名称>
+
+
