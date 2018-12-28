@@ -1,0 +1,90 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/components/order",
+			"style": {
+				"navigationBarTitleText": "协同"
+			}
+		}, {
+			"path": "pages/components/info",
+			"style": {
+				"navigationBarTitleText": "信息"
+			}
+		}, {
+			"path": "pages/components/application",
+			"style": {
+				"navigationBarTitleText": "应用"
+			}
+		}, {
+			"path": "pages/components/myself",
+			"style": {
+				"navigationBarTitleText": "我的"
+			}
+		}, {
+			"path": "pages/components/form-flow",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		}, {
+			"path": "pages/components/login",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
+		}, {
+			"path": "pages/components/setting",
+			"style": {
+				"navigationBarTitleText": "设置服务器地址",
+				"app-plus": {
+					"titleNView": {
+						"buttons": [{
+								"type": "favorite"
+
+							},
+							{
+								"type": "none",
+								"text": "\ue534",
+								"fontSrc": "./static/ttf/uni.ttf",
+								"fontSize": "22px"
+							}
+						]
+					}
+				}
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"tabBar": {
+		"color": "#bfbfbf",
+		"selectedColor": "#0faeff",
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [{
+				"pagePath": "pages/components/order",
+				"iconPath": "static/img/order.png",
+				"selectedIconPath": "static/img/orderHL.png",
+				"text": "待办"
+			}, {
+				"pagePath": "pages/components/info",
+				"iconPath": "static/img/info.png",
+				"selectedIconPath": "static/img/infoHL.png",
+				"text": "信息"
+			}, {
+				"pagePath": "pages/components/application",
+				"iconPath": "static/img/application.png",
+				"selectedIconPath": "static/img/applicationHL.png",
+				"text": "应用"
+			},
+			{
+				"pagePath": "pages/components/myself",
+				"iconPath": "static/img/my.png",
+				"selectedIconPath": "static/img/myHL.png",
+				"text": "我的"
+			}
+		]
+	}
+}
