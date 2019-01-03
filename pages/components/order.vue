@@ -18,7 +18,7 @@
 			<swiper-item>
 				<scroll-view class="swiper-one-list" scroll-y="true">
 					<block v-for="(item, index) in already_done_items" :key="index">
-						<view class="uni-card" hover-class="uni-list-cell-hover" @click="toFormInfo">
+						<view class="uni-card" hover-class="uni-list-cell-hover" @click="toFormInfo(['正文','流程'])">
 							<view class="uni-card-header uni-card-media">
 								<image class="uni-card-media-logo" src="../../static/img/uni@2x.png"></image>
 								<view class="uni-card-media-body">
@@ -34,7 +34,7 @@
 			<swiper-item>
 				<scroll-view class="swiper-one-list" scroll-y="true" @scrolltolower="loadOver">
 					<block v-for="(item, index) in already_issued_item" :key="index">
-						<view class="uni-card" hover-class="uni-list-cell-hover" @click="toFormInfo">
+						<view class="uni-card" hover-class="uni-list-cell-hover" @click="toFormInfo(['表单','流程'])">
 							<view class="uni-card-header uni-card-media">
 								<image class="uni-card-media-logo" src="../../static/img/uni@2x.png"></image>
 								<view class="uni-card-media-body">
@@ -50,7 +50,7 @@
 			<swiper-item>
 				<scroll-view class="swiper-one-list" scroll-y="true" @scrolltolower="loadOver">
 					<block v-for="(item, index) in tobe_issued_item" :key="index">
-						<view class="uni-card" hover-class="uni-list-cell-hover" @click="toFormInfo">
+						<view class="uni-card" hover-class="uni-list-cell-hover" @click="toFormInfo(['表单','流程'])">
 							<view class="uni-card-header uni-card-media">
 								<image class="uni-card-media-logo" src="../../static/img/uni@2x.png"></image>
 								<view class="uni-card-media-body">
@@ -210,9 +210,9 @@
 			loadOver: function() {
 
 			},
-			toFormInfo: function(){
+			toFormInfo: function(flowArr){
 				uni.navigateTo({
-					url:'../components/form-flow'
+					url:'../components/form-flow?flow='+ flowArr
 				})
 			}
 		}

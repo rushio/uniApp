@@ -23,14 +23,15 @@
 	export default {
 		data() {
 			return {
-				items: [
-					'表单',
-					'流程'
-				],
+				items: [],
 				current: 0,
 				activeColor: '#007aff',
 				styleType: 'button'
 			}
+		},
+		onLoad(option) {
+			// option是通过页面跳转，传递过来的参数，所有参数都被封装成对象。通过option.key，key是对应参数名称。
+			this.items = option.flow.split(",");
 		},
 		computed:{
 			activeStyle() {

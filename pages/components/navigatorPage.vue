@@ -11,10 +11,11 @@
 <script>
 	export default {
 		data: {
+			title : "navigatorPage"
 		},
 		onLoad: function(options) {
 			console.log(options);
-			console.log(options.title);
+			this.title = options.title;
 		}
 	}
 </script>
