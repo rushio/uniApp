@@ -2,6 +2,7 @@ Flex布局（小程序Flex布局）
 参考：
 http://www.hcoder.net/tutorials/info_183.html
 https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+https://www.cnblogs.com/nuannuan7362/p/5823381.html
 
 2009年，W3C提出了Flex布局，可以简便、完整、响应式地实现各种页面布局。
 已经得到了所有浏览器的支持，发布的小程序则广泛使用了flx布局，Flex布局将成为未来布局的首选方案。

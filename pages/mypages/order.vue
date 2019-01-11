@@ -212,7 +212,7 @@
 			},
 			toFormInfo: function(flowArr){
 				uni.navigateTo({
-					url:'../components/form-flow?flow='+ flowArr
+					url:'../mypages/form-flow?flow='+ flowArr
 				})
 			}
 		}

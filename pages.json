@@ -1,42 +1,54 @@
 {
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 		{
-			"path": "pages/components/test",
+			/* "path": "pages/mypages/test2",
 			"style": {
 				"navigationBarTitleText": "index"
+			} */
+			"path": "pages/mypages/condition",
+			"style": {
+				"navigationBarTitleText": "工况录入",
+				"app-plus": {
+					"titleNView": {
+						"buttons": [{
+							"text": "任务",
+							"fontSize": "18px"
+						}]
+					}
+				}
 			}
-		}, {
-			"path": "pages/components/order",
+		},{
+			"path": "pages/mypages/order",
 			"style": {
 				"navigationBarTitleText": "协同"
 			}
 		}, {
-			"path": "pages/components/info",
+			"path": "pages/mypages/info",
 			"style": {
 				"navigationBarTitleText": "信息"
 			}
 		}, {
-			"path": "pages/components/application",
+			"path": "pages/mypages/application",
 			"style": {
 				"navigationBarTitleText": "应用"
 			}
 		}, {
-			"path": "pages/components/myself",
+			"path": "pages/mypages/myself",
 			"style": {
 				"navigationBarTitleText": "我的"
 			}
 		}, {
-			"path": "pages/components/form-flow",
+			"path": "pages/mypages/form-flow",
 			"style": {
 				"navigationBarTitleText": ""
 			}
 		}, {
-			"path": "pages/components/login",
+			"path": "pages/mypages/login",
 			"style": {
 				"navigationBarTitleText": "登录"
 			}
 		}, {
-			"path": "pages/components/setting",
+			"path": "pages/mypages/setting",
 			"style": {
 				"navigationBarTitleText": "设置服务器地址",
 				"app-plus": {
@@ -55,6 +67,24 @@
 					}
 				}
 			}
+		}, {
+			"path": "pages/mypages/condition",
+			"style": {
+				"navigationBarTitleText": "工况录入",
+				"app-plus": {
+					"titleNView": {
+						"buttons": [{
+							"text": "任务",
+							"fontSize": "18px"
+						}]
+					}
+				}
+			}
+		}, {
+			"path": "pages/mypages/construction",
+			"style": {
+				"navigationBarTitleText": "施工任务选择"
+			}
 		}
 	],
 	"globalStyle": {
@@ -69,23 +99,23 @@
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
 		"list": [{
-				"pagePath": "pages/components/order",
+				"pagePath": "pages/mypages/order",
 				"iconPath": "static/img/order.png",
 				"selectedIconPath": "static/img/orderHL.png",
 				"text": "待办"
 			}, {
-				"pagePath": "pages/components/info",
+				"pagePath": "pages/mypages/info",
 				"iconPath": "static/img/info.png",
 				"selectedIconPath": "static/img/infoHL.png",
 				"text": "信息"
 			}, {
-				"pagePath": "pages/components/application",
+				"pagePath": "pages/mypages/application",
 				"iconPath": "static/img/application.png",
 				"selectedIconPath": "static/img/applicationHL.png",
 				"text": "应用"
 			},
 			{
-				"pagePath": "pages/components/myself",
+				"pagePath": "pages/mypages/myself",
 				"iconPath": "static/img/my.png",
 				"selectedIconPath": "static/img/myHL.png",
 				"text": "我的"
