@@ -17,7 +17,7 @@
 			</view>
 		</view>
 		<view class="btn-row">
-			<button type="primary" class="primary" @tap="bindLogin">登录</button>
+			<button type="primary" class="primary" @click="bindLogin">登录</button>
 		</view>
 		<view>
 			<navigator url="setting" hover-class="navigator-hover">
@@ -28,9 +28,12 @@
 </template>
 
 <script>
+	import server from '../../common/service.js'
 	export default {
 		data() {
 			return {
+				account: '',
+				password: '',
 				showPassword: true
 			};
 		},
@@ -38,25 +41,59 @@
 			changePassword: function() {
 				this.showPassword = !this.showPassword;
 			},
-
 			bindLogin: function() {
-				uni.getStorage({
-					key: 'service',
-					success: () => {
-						// 				uni.request({
-						// 					url: ''
-						// 				});
-						uni.redirectTo({
-							url: './main'
-						});
+				if (this.account.length <= 0) {
+					uni.showToast({
+						icon: 'none',
+						title: '请输入用户名.'
+					});
+					return;
+				}
+				if (this.password.length <= 0) {
+					uni.showToast({
+						icon: 'none',
+						title: '请输入密码.'
+					});
+					return;
+				}
+				uni.request({
+					url: server.SERVICE_URL+ 'mAccount/LogOn',
+					data: {
+						username: this.account,
+						password: this.password
 					},
-					fail: () => {
+					success(object) {
+						if(object.statusCode === 200) {
+							let data = JSON.stringify(object.data);
+							if (data != "[]") {
+								// 本地存储信息
+								const user = {
+									account: data.UserName,
+									password: this.password
+								};
+								console.log(data.UnitID);
+								// server.addUser(user);
+								server.setPoints(data.Projects);
+								uni.switchTab({
+									url: './application'
+								})
+							}
+						} else {
+							console.log(object.statusCode);
+							uni.showToast({
+								icon: 'none',
+								title: '登录失败.'
+							});
+						}
+					},
+					fail() {
 						uni.showToast({
-							title: '请设置服务器地址！',
-							icon: 'none'
+							icon: 'none',
+							title: '登录异常.'
 						});
 					}
-				});
+				})
+				
 			}
 		}
 	}

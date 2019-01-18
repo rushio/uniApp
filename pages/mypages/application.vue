@@ -1,6 +1,6 @@
 <template>
-	<view>
-		<view class="uni-grid-9 uni-common-mt">
+	<view style="padding-top: 30upx;">
+		<view class="uni-grid-9">
 			<view class="uni-grid-9-item" hover-class="uni-grid-9-item-hover" v-for="(item,index) in gridText" :key="index"
 			 :class="index % 3 === 2 ? 'no-border-right' : ''" @click="onClick(index)">
 				<image class="uni-grid-9-image" src="../../static/img/uni@2x.png"></image>
@@ -11,11 +11,12 @@
 </template>
 
 <script>
+	
 	export default {
 		data() {
 			return {
-				gridText: ['工况', '协同', '公文', '会议', '查询统计', '新闻', '公告', '文档', '任务', '会议', '统计', '时间安排', '登录'],
-				gridIcon: []
+				gridText: ['工况'],
+				gridIcon: [],
 			};
 		},
 		methods: {
@@ -26,10 +27,7 @@
 							url: "../mypages/condition"
 						})
 						break;
-					case 12:
-						uni.navigateTo({
-							url: "../mypages/login"
-						})
+					case 1:
 						break;
 					default:
 						break;

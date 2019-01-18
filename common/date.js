@@ -1,12 +1,11 @@
-const websiteUrl = 'http://uniapp.dcloud.io';
-const now = Date.now() || function() {
-	return new Date().getTime();
-};
-const isArray = Array.isArray || function(obj) {
-	return obj instanceof Array;
-};
+const now = new Date();
+
+const time = now.getTime(); // 1547608579197
+
+const date = now.getFullYear() + "-" + now.getMonth() + 1 + "-" + now.getDate(); // 2019-01-16
+
 export default {
-	websiteUrl,
 	now,
-	isArray
+	time,
+	date
 }

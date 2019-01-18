@@ -1,23 +1,17 @@
 {
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		{
-			/* "path": "pages/mypages/test2",
+		/* {
+			"path": "pages/mypages/loginTest",
 			"style": {
 				"navigationBarTitleText": "index"
-			} */
-			"path": "pages/mypages/condition",
-			"style": {
-				"navigationBarTitleText": "工况录入",
-				"app-plus": {
-					"titleNView": {
-						"buttons": [{
-							"text": "任务",
-							"fontSize": "18px"
-						}]
-					}
-				}
 			}
-		},{
+		}, */
+		{
+			"path": "pages/mypages/myself",
+			"style": {
+				"navigationBarTitleText": "加载中..."
+			}
+		}, {
 			"path": "pages/mypages/order",
 			"style": {
 				"navigationBarTitleText": "协同"
@@ -31,11 +25,6 @@
 			"path": "pages/mypages/application",
 			"style": {
 				"navigationBarTitleText": "应用"
-			}
-		}, {
-			"path": "pages/mypages/myself",
-			"style": {
-				"navigationBarTitleText": "我的"
 			}
 		}, {
 			"path": "pages/mypages/form-flow",
@@ -54,16 +43,14 @@
 				"app-plus": {
 					"titleNView": {
 						"buttons": [{
-								"type": "favorite"
+							"type": "favorite"
 
-							},
-							{
-								"type": "none",
-								"text": "\ue534",
-								"fontSrc": "./static/ttf/uni.ttf",
-								"fontSize": "22px"
-							}
-						]
+						}, {
+							"type": "none",
+							"text": "\ue534",
+							"fontSrc": "./static/ttf/uni.ttf",
+							"fontSize": "22px"
+						}]
 					}
 				}
 			}
@@ -72,18 +59,36 @@
 			"style": {
 				"navigationBarTitleText": "工况录入",
 				"app-plus": {
+					"bounce": "none",
 					"titleNView": {
 						"buttons": [{
-							"text": "任务",
-							"fontSize": "18px"
+							/* 注意content: "\e81b"在text中使用要在\后面添加u */
+							"text": "\ue81b",
+							"fontSrc": "./static/ttf/iconfont.ttf",
+							"fontSize": "22px"
 						}]
 					}
 				}
 			}
 		}, {
-			"path": "pages/mypages/construction",
+			"path": "pages/mypages/conditionAdd",
 			"style": {
-				"navigationBarTitleText": "施工任务选择"
+				"navigationBarTitleText": "创建工况"
+			}
+		}, {
+			"path": "pages/mypages/conditionSelect",
+			"style": {
+				"navigationBarTitleText": "选择工点"
+			}
+		}, {
+			"path": "pages/mypages/condition-partition",
+			"style": {
+				"navigationBarTitleText": "分区工序"
+			}
+		}, {
+			"path": "pages/mypages/conditionCreate",
+			"style": {
+				"navigationBarTitleText": "工况录入"
 			}
 		}
 	],
