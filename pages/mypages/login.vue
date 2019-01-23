@@ -10,7 +10,7 @@
 			</view>
 			<view class="input-row">
 				<text class="title">密码：</text>
-				<input type="text" maxlength="10" confirm-type="done" password="true" v-model="password" placeholder="请输入密码">
+				<input type="text" maxlength="10" :password="inputType==='password'&&showPassword" confirm-type="done"  v-model="password" placeholder="请输入密码">
 				<view class="icon-eys-position">
 					<view class="uni-icon uni-icon-eye" :class="[!showPassword ? 'uni-active' : '']" @click="changePassword"></view>
 				</view>
@@ -34,6 +34,7 @@
 			return {
 				account: '',
 				password: '',
+				inputType: 'password',
 				showPassword: true
 			};
 		},
@@ -64,18 +65,18 @@
 					},
 					success(object) {
 						if(object.statusCode === 200) {
-							let data = JSON.stringify(object.data);
-							if (data != "[]") {
+							var obj = JSON.stringify(object.data);
+							//console.log(obj)
+							if (obj != "[]") {
 								// 本地存储信息
 								const user = {
-									account: data.UserName,
-									password: this.password
+									account: object.data.UserName,
+									password: ""
 								};
-								console.log(data.UnitID);
-								// server.addUser(user);
-								server.setPoints(data.Projects);
+								server.addUser(user);
+								server.setPoints(object.data.Projects);
 								uni.switchTab({
-									url: './application'
+									url: './myself'
 								})
 							}
 						} else {
@@ -89,7 +90,7 @@
 					fail() {
 						uni.showToast({
 							icon: 'none',
-							title: '登录异常.'
+							title: '请检查网络或服务.'
 						});
 					}
 				})

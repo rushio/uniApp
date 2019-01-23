@@ -8,7 +8,7 @@
 			</view>
 			<view class="uni-input-row-item">
 				<label>填&nbsp;&nbsp;&nbsp;&nbsp;报&nbsp;&nbsp;&nbsp;人：</label>
-				<input disabled="true" value="张三" />
+				<input disabled="true" :value="username" />
 			</view>
 			<view class="uni-input-row-item">
 				<label>施工状态：(必填)</label>
@@ -36,6 +36,7 @@
 <script>
 	import now from '../../common/date.js'
 	import datePicker from '../../components/date-picker/date-picker.vue'
+	import service from '../../common/service.js'
 	
 	export default {
 		components: {
@@ -45,7 +46,9 @@
 			return {
 				todayDate: '',
 				showPicker: false,
-				conditionName:''
+				conditionName:'',
+				username: '',
+				siteId: ''
 			}
 		},
 		methods: {
@@ -56,15 +59,41 @@
 				this.todayDate = date.value;
 			},
 			onNext:function(){
-				if(this.conditionName === undefined || this.conditionName === null) {
+				if(undefined === this.conditionName || "" === this.conditionName) {
 					uni.showToast({
 						icon:'none',
 						title:'请选择工点.'
 					})
 					return;
 				}
-				uni.navigateTo({
-					url: './condition-partition'
+				// 获取工点下分区
+				uni.request({
+					url: service.SERVICE_URL+ 'MCsp/GetSiteAreas',
+					data: {
+						siteid: this.siteId
+					},
+					success(succ) {
+						if(succ.statusCode === 200) {
+							//console.log(succ.data.length+ " => "+ JSON.stringify(succ.data))
+							for (let i = 0; i < succ.data.length; i++) {
+								succ.data[i].CanSelect = false;
+							}
+							service.setPointLists(succ.data)
+							uni.navigateTo({
+								//url: './conditionPartition'
+								url: './conditionPartitionLeft'
+							})
+						} else {
+							console.log(succ.statusCode)
+							uni.showToast({
+								icon: 'none',
+								title: '获取分区失败.'
+							});
+						}
+					},
+					fail() {
+						console.log('fail => 获取分区失败.')
+					}
 				})
 			},
 			selGongDian(){
@@ -75,12 +104,18 @@
 		},
 		onLoad() {
 			this.todayDate = now.date;
+			this.username = service.getUsers()[0].account;
 		},
 		onShow() {
 			var pages= getCurrentPages();
 			var page = pages[pages.length - 1]
-			if(page.data.point != "") {
+			if(undefined != page.data.point) {
 				this.conditionName = page.data.point;
+				//console.log(this.conditionName)
+			}
+			if(undefined != page.data.siteId) {
+				this.siteId = page.data.siteId;
+				//console.log(this.siteId)
 			}
 		}
 	}

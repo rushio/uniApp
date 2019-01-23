@@ -9,16 +9,18 @@
 	export default {
 		data() {
 			return {
-				userInfo: server.getUsers()
+				userInfo: [{account: '您未登录'}]
 			}
 		},
 		onLoad() {
-			console.log(JSON.stringify(server.getUsers()))
 			if ("[]" === JSON.stringify(server.getUsers())) {
+				console.log("set login")
 				uni.reLaunch({
 					url: "./login"
 				})
 			} else {
+				this.userInfo = server.getUsers();
+				console.log("get login =>" + JSON.stringify(server.getUsers()))
 				uni.switchTab({
 					url: './application'
 				})

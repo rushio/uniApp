@@ -5,24 +5,37 @@
 				<view class="uni-list-cell uni-collapse" v-for="(list,index) in lists" :key="index" 
 				:class="index === lists.length - 1 ? 'uni-list-cell-last' : ''">
 					<view class="uni-list-cell-navigate uni-navigate-bottom" hover-class="uni-list-cell-hover" 
-					:class="list.show ? 'uni-active' : ''" @click="trigerCollapse(list.title, index)">
-						{{list.title}}
+					:class="list.Level ? 'uni-active' : ''"
+					 @click="trigerCollapse(index)">
+						{{list.Name}}
 					</view>
-					
-					<view class="uni-list uni-collapse" :class="list.show ? 'uni-active' : ''">
-                        <block v-for="(item,key) in list.item" :key="key">
+					<!-- 二级列表 -->
+					<view class="uni-list uni-collapse" :class="list.Level ? 'uni-active' : ''">
+						<block v-for="(item2,key2) in list.Children" :key="key2" 
+							:class="key2 === list.Children.length - 1 ? 'uni-list-cell-last' : ''">
 							<view class="uni-list-cell" hover-class="uni-list-cell-hover" 
-							@click="trigerCollapse2(item.title, key)"
-							:class="key === list.item.length - 1 ? 'uni-list-cell-last' : ''">
-								<view class="uni-list-cell-navigate uni-navigate-bottom"> {{item.title}}	</view>
+							@click="trigerCollapse2(key2)">
+								<view class="uni-list-cell-navigate uni-navigate-bottom"
+								:class="item2.Level ? 'uni-active' : ''"> {{item2.Name}} </view>
 							</view>
-							
-							<view class="uni-list uni-collapse" :class="item.show ? 'uni-active' : ''">
-								<view class="uni-list-cell" v-for="(item2,key2) in item.item" :key="key2"
-								:class="key2 === item.item.length - 1 ? 'uni-list-cell-last' : ''">
-									<view class="uni-list-cell-navigate" hover-class="uni-list-cell-hover"
-									@click="onSelectPoints(item2)">{{item2}}</view>
-								</view>
+							<!-- 三级列表 -->
+							<view class="uni-list uni-collapse" :class="item2.Level ? 'uni-active' : ''">
+								<block v-for="(item3,key3) in item2.Children" :key="key3">
+									<view class="uni-list-cell" hover-class="uni-list-cell-hover"
+									@click="trigerCollapse3(key3)" :class="key3 === item2.Children.length - 1 ? 'uni-list-cell-last' : ''">
+										<view style="margin-left: 30upx;" class="uni-list-cell-navigate uni-navigate-bottom"
+										:class="item3.Level ? 'uni-active' : ''">{{item3.Name}}</view>
+									</view>
+									<!-- 四级列表 -->
+									<view class="uni-list uni-collapse" :class="item3.Sites.length ? 'uni-active' : ''">
+										<block v-for="(item4,key4) in item3.Sites" :key="key4">
+											<view class="uni-list-cell" hover-class="uni-list-cell-hover"
+											@click="onSelectPoints(list.Name,item2.Name,item3.Name,item4)" :class="key4 === item3.Sites.length - 1 ? 'uni-list-cell-last' : ''">
+												<view style="margin-left: 60upx;" class="uni-list-cell-navigate">{{item4.SiteName}}</view>
+											</view>
+										</block>
+									</view>
+								</block>
 							</view>
 						</block>
 					</view>
@@ -33,79 +46,74 @@
 </template>
 
 <script>
+	import service from '../../common/service.js'
+	
 	export default {
 		data() {
 			return {
-				luxian:'',
-				bianduan:'',
-				lists: [{
-						title: "路线1",
-						show: false,
-						item: [{
-							title: "标段1",
-							show: false,
-							item: ["工点1", "工点2", "工点3"]
-						}, {
-							title: "标段2",
-							show: false,
-							item: ["工点1"]
-						}]
-					},
-					{
-						title: "路线2",
-						show: false,
-						item: [{
-							title: "标段1",
-							show: false,
-							item: ["工点1", "工点2", "工点3"]
-						}, {
-							title: "标段2",
-							show: false,
-							item: ["工点1", "工点2"]
-						}]
-					},
-					{
-						title: "路线3",
-						show: false,
-						item: []
-					}
-				]
+				lists: []
 			}
 		},
 		methods: {
-			onSelectPoints: function(point){
-				var gongdian= this.luxian + "-" + this.bianduan + "-" + point;
+			onSelectPoints: function(name,name2,name3,site) {
+				var dian = name + ">" + name2 + ">" + name3 + '>' + site.SiteName;
 				var pages = getCurrentPages();
-				var page = pages[pages.length - 2];
+				var page = pages[pages.length - 2]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
 				page.setData({
-					point: gongdian 
+					point: dian,
+					siteId: site.SiteID
 				})
 				uni.navigateBack({
-					delta:page
+					delta: page
 				})
 			},
-			trigerCollapse(title, e) {
-				this.luxian = title;
+			trigerCollapse(e) {
 				for (let i = 0, len = this.lists.length; i < len; ++i) {
 					if (e === i) {
-						this.lists[i].show = !this.lists[i].show;
+						this.lists[i].Level = !this.lists[i].Level;
 					} else {
-						this.lists[i].show = false;
+						this.lists[i].Level = false;
 					}
 				}
 			},
-			trigerCollapse2(title, key) {
-				this.bianduan = title;
+			trigerCollapse2(key) {
 				for (let i = 0, len = this.lists.length; i < len; ++i) {
-					for (let j = 0, len = this.lists[i].item.length; j < len; ++j) {
+					for (let j = 0, len = this.lists[i].Children.length; j < len; ++j) {
 						if (key === j) {
-							this.lists[i].item[j].show = !this.lists[i].item[j].show;
+							this.lists[i].Children[j].Level = !this.lists[i].Children[j].Level;
 						} else {
-							this.lists[i].item[j].show = false;
+							this.lists[i].Children[j].Level = false;
+						}
+					}
+				}
+			},
+			trigerCollapse3(key) {
+				for (let i = 0, len = this.lists.length; i < len; ++i) {
+					for (let j = 0, len = this.lists[i].Children.length; j < len; ++j) {
+						for (let k = 0, len = this.lists[j].Children.length; k < len; ++k) {
+							if (key === k) {
+								this.lists[i].Children[j].Children[k].Level = !this.lists[i].Children[j].Children[k].Level;
+							} else {
+								this.lists[i].Children[j].Children[k].Level = false;
+							}
 						}
 					}
 				}
 			}
+		},
+		onLoad() {
+			var list = service.getPoints();
+			for (let i = 0; i < list.length; i++) {
+				list[i].Level = false;
+				for (let j = 0; j < list[i].Children.length; j++) {
+					list[i].Children[j].Level = false;
+					for (let k = 0; k < list[i].Children[j].Children.length; k++) {
+						list[i].Children[j].Children[k].Level = false;
+					}
+				}
+			}
+			this.lists = list;
+			//console.log(JSON.stringify(this.lists[0]))
 		}
 	}
 </script>

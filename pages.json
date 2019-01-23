@@ -1,7 +1,7 @@
 {
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 		/* {
-			"path": "pages/mypages/loginTest",
+			"path": "pages/mypages/conditionCreate",
 			"style": {
 				"navigationBarTitleText": "index"
 			}
@@ -81,7 +81,12 @@
 				"navigationBarTitleText": "选择工点"
 			}
 		}, {
-			"path": "pages/mypages/condition-partition",
+			"path": "pages/mypages/conditionPartition",
+			"style": {
+				"navigationBarTitleText": "分区工序"
+			}
+		}, {
+			"path": "pages/mypages/conditionPartitionLeft",
 			"style": {
 				"navigationBarTitleText": "分区工序"
 			}

@@ -49,6 +49,7 @@
 <script>
 	import uniNavBar from "../../components/search-date/uni-nav-bar.vue"
 	import uniIcon from "../../components/search-date/uni-icon.vue"
+	import service from '../../common/service.js'
 
 	export default {
 		data() {
@@ -90,8 +91,29 @@
 					this.current = index;
 				}
 			},
-			groupList:function(){
+			groupList: function() {
 				console.log("groupList")
+			},
+			getUnitEngineerings () {
+				// 获取所有单位工程
+				uni.request({
+					url: service.SERVICE_URL+ 'MCsp/GetAllUnitEngineerings',
+					success(succ) {
+						if(succ.statusCode === 200){
+							//console.log("data size "+ succ.data.length+ " => "+ JSON.stringify(succ.data[0]))
+							service.setUnitEngineeringLists(succ.data)
+						} else {
+							console.log(succ.statusCode)
+							uni.showToast({
+								icon: 'none',
+								title: '获取单位工程失败.'
+							})
+						}
+					},
+					fail() {
+						console.log("fail => 获取单位工程失败.")
+					}
+				})
 			}
 		},
 		onNavigationBarButtonTap(data) {
@@ -115,6 +137,7 @@
 			uniIcon
 		},
 		onLoad() {
+			this.getUnitEngineerings()
 		}
 	}
 </script>

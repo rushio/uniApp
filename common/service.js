@@ -35,11 +35,37 @@ const getPoints = function(){
 }
 // 保存“工点”信息
 const setPoints = function (points) {
-    let point = getPoints();
-    point.push({
-        points: points
-    });
-    uni.setStorageSync(PONINTS_KEY, JSON.stringify(point));
+    uni.setStorageSync(PONINTS_KEY, JSON.stringify(points));
+}
+
+// 获取工点下分区
+const PARTITION_LISTS = "PARTITION_LISTS";
+const getPointLists = function(){
+	let ret = '';
+	ret = uni.getStorageSync(PARTITION_LISTS);
+	if (!ret) {
+	    ret = '[]';
+	}
+	return JSON.parse(ret);
+}
+// 保存工点下分区
+const setPointLists = function (lists) {
+    uni.setStorageSync(PARTITION_LISTS, JSON.stringify(lists));
+}
+
+// 获取单位工程
+const UNIT_ENGINEERING = 'UNIT_ENGINEERING';
+const getUnitEngineeringLists = function() {
+	let ret = '';
+	ret = uni.getStorageSync(UNIT_ENGINEERING);
+	if (!ret) {
+		ret = '[]';
+	}
+	return JSON.parse(ret);
+}
+// 保存单位工程
+const setUnitEngineeringLists = function(unit) {
+	uni.setStorageSync(UNIT_ENGINEERING, JSON.stringify(unit))
 }
 
 export default {
@@ -47,5 +73,9 @@ export default {
     addUser,
     getUsers,
 	setPoints,
-	getPoints
+	getPoints,
+	setPointLists,
+	getPointLists,
+	setUnitEngineeringLists,
+	getUnitEngineeringLists
 }

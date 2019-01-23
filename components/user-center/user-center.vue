@@ -46,8 +46,10 @@
 		props: {
 			/* 用户信息 */
 			user: {
-				type: String,
-				default: '您未登录'
+				type: Array,
+				default: function(){
+					[{account: '您未登录'}]
+				}
 			}
 		},
 		data() {
