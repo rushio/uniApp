@@ -11,14 +11,14 @@
 			 scroll-with-animation>
 				<view class="uni-card">
 					<view class="uni-list">
-						<view class="uni-list-cell uni-collapse" v-for="(list,index) in subItemLists[0]" :key="index" :class="index === subItemLists[0].length - 1 ? 'uni-list-cell-last' : ''">
+						<view class="uni-list-cell uni-collapse" v-for="(list,index) in subItemLists" :key="index" :class="index === subItemLists.length - 1 ? 'uni-list-cell-last' : ''">
 							<view class="uni-list-cell-navigate uni-navigate-bottom" hover-class="uni-list-cell-hover" :class="list.IsSite ? 'uni-active' : ''"
-							 @click="trigerCollapse(index)">
+							 @click="trigerCollapse(list,index)">
 								{{list.name}}
 							</view>
 							<view class="uni-list uni-collapse" :class="list.IsSite ? 'uni-active' : ''">
 								<view class="uni-list-cell" hover-class="uni-list-cell-hover" v-for="(item,key) in list.items" :key="key"
-								 :class="key === list.items.length - 1 ? 'uni-list-cell-last' : ''" @click="toConditionCreate(list.Data.Attributes)">
+								 :class="key === list.items.length - 1 ? 'uni-list-cell-last' : ''" @click="toConditionCreate(item.id, list.Data.Attributes)">
 									<view class="uni-list-cell-navigate"> {{item.name}} </view>
 								</view>
 							</view>
@@ -42,7 +42,11 @@
 				scrollHeight: 0,
 				partitionLists: [],
 				unitEngineeringLists: [],
-				subItemLists: []
+				subItemLists: [],
+				mode: '',
+				partitionValue: '',
+				subID: '',
+				subName: ''
 			}
 		},
 		methods: {
@@ -50,39 +54,66 @@
 				this.scrollHeight = e.detail.scrollHeight;
 			},
 			getSubItemLists(partition, index) {
+				//console.log("partition => "+ JSON.stringify(partition))
 				this.categoryActive = index;
 				this.scrollTop = -this.scrollHeight * index;
-				//console.log("partition => " JSON.stringify(partition))
+				// 分区areaid => Value
+				this.partitionValue = partition.Value;
 				this.subItemLists = [];
 				for (let i = 0; i < this.unitEngineeringLists.length; i++) {
+					// 获取当前分区对应的工程类型下的分部分项
+					//console.log("Code => "+ partition.ProjectTypeCode+ " -- Data.Code => "+this.unitEngineeringLists[i].Data.Code)
 					if (partition.ProjectTypeCode === this.unitEngineeringLists[i].Data.Code) {
-						this.subItemLists.push(this.unitEngineeringLists[i].items)
+						this.subItemLists = this.unitEngineeringLists[i].items
+						//console.log("this.subItemLists size "+this.subItemLists.length+ " => "+ JSON.stringify(this.subItemLists))
 					}
 				}
 			},
-			toConditionCreate(attributes) {
+			/**
+			 * id：表示工序的id
+			 * attributes：表示工序的att
+			 */
+			toConditionCreate(id, attributes) {
+				var step = { //JSON.stringify()
+					AreaID: this.partitionValue, // 分区 => Value
+					SubItemID: this.subID, //分部分项id
+					SubName: this.subName, //分部分项名称
+					TaskItemID: id, // 工程类型 -> 分部分项 -> 工序item:id
+					Name: '', // 
+					CspTaskItemID: '', //
+					Status: '', // 表示施工状态共4种 => 数字
+					Mark: '',
+					Attributes: [] //JSON.stringify()
+				}
+				this.mode.Steps.push(JSON.stringify(step));
 				uni.navigateTo({
-					url: './conditionCreate?att='+ attributes
+					url: './conditionCreate?att=' + attributes + "&mode=" + JSON.stringify(this.mode)
 				})
 			},
-			trigerCollapse(e) {
-				for (let i = 0, len = this.subItemLists[0].length; i < len; ++i) {
+			trigerCollapse(sub, e) {
+				// 分部分项subitemid => id
+				this.subID = sub.id;
+				// 分部分项名称subname
+				this.subName = sub.name;
+				for (let i = 0, len = this.subItemLists.length; i < len; ++i) {
 					if (e === i) {
-						this.subItemLists[0][i].IsSite = !this.subItemLists[0][i].IsSite;
+						this.subItemLists[i].IsSite = !this.subItemLists[i].IsSite;
 					} else {
-						this.subItemLists[0][i].IsSite = false;
+						this.subItemLists[i].IsSite = false;
 					}
 				}
 			}
 		},
-		onLoad: function() {
+		onLoad: function(load) {
 			this.height = uni.getSystemInfoSync().windowHeight;
-			// getPointLists获取工点下的所有分区
-			this.partitionLists = service.getPointLists()
-			//console.log("lists => "+ this.partitionLists.length+ " "+ JSON.stringify(this.partitionLists[0]))
+			this.mode = JSON.parse(load.mode)
+			//console.log("model => "+ JSON.stringify(this.mode))
+			this.partitionLists = JSON.parse(load.pointLists);
+			//console.log("partitionLists size "+ this.partitionLists.length+ " => "+ JSON.stringify(this.partitionLists))
 			// getUnitEngineeringLists获取本地的所有单位工程
 			this.unitEngineeringLists = service.getUnitEngineeringLists();
 			if (1 <= this.partitionLists.length) {
+				// 初始化第一个分区的分部分项
 				this.getSubItemLists(this.partitionLists[0], 0)
 			}
 		}

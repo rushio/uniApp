@@ -22,19 +22,24 @@
 		</view>
 		<view class="content">
 			<view v-show="current === 0">
-				<view class="uni-list">
-					<view class="uni-list-cell" v-for="(item,index) in dataList" :key="index">
-						<checkbox class="uni-list-cell-navigate-box"></checkbox>
-						<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover">
-							{{item.title}}
-							<view class="uni-list-cell-navigate-date">{{item.date}}</view>
+				<view v-if="localList.length">
+					<view class="uni-list">
+						<view class="uni-list-cell" v-for="(item,index) in localList" :key="index">
+							<checkbox class="uni-list-cell-navigate-box"></checkbox>
+							<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover">
+								{{item.Title}}
+								<view class="uni-list-cell-navigate-date">{{item.StepDate}}</view>
+							</view>
 						</view>
 					</view>
+				</view>
+				<view style="text-align: center;" v-else>
+					<image class="img-empty" src="../../static/img/network_error.png"></image>
 				</view>
 			</view>
 			<view v-show="current === 1">
 				<view class="uni-list">
-					<view class="uni-list-cell" v-for="(item,index) in dataList" :key="index">
+					<view class="uni-list-cell" v-for="(item,index) in commitList" :key="index">
 						<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover">
 							{{item.title}}
 							<view class="uni-list-cell-navigate-date">{{item.date}}</view>
@@ -54,23 +59,6 @@
 	export default {
 		data() {
 			return {
-				dataList: [{
-					title: "线路-标段-工点",
-					commit: 0,
-					date: '2019-01-15'
-				}, {
-					title: "线路-标段1-工点2",
-					commit: 1,
-					date: '2019-01-15'
-				}, {
-					title: "线路-标段-工点2",
-					commit: 0,
-					date: '2019-01-15'
-				}, {
-					title: "线路-标段1-工点",
-					commit: 1,
-					date: '2019-01-14'
-				}],
 				current: 0,
 				activeColor: '#007aff',
 				styleType: 'button',
@@ -90,9 +78,6 @@
 				if (this.current !== index) {
 					this.current = index;
 				}
-			},
-			groupList: function() {
-				console.log("groupList")
 			},
 			getUnitEngineerings () {
 				// 获取所有单位工程
@@ -119,6 +104,27 @@
 		onNavigationBarButtonTap(data) {
 			//console.log(JSON.stringify(index)) => {"text":"任务","fontSize":"18px","__cb__":{"id":"plus291547100205599","htmlId":"86516565"},"index":0}
 			if (data.index === 0) {
+				// 获取某工点最后一次施工工况日期
+				uni.request({
+					url: service.SERVICE_URL+ 'MCsp/GetLastUploadDate',
+					method: 'GET',
+					data: {},
+					success: res => {
+						if (res.statusCode === 200) {
+							//console.log("date => "+ JSON.stringify(res.data));
+							service.setLastUploadDate(res.data)
+						} else {
+							console.log(res.statusCode)
+							uni.showToast({
+								icon: 'none',
+								title: '获取工点最后工况日期失败.'
+							})
+						}
+					},
+					fail: () => {
+						console.log("fail => 获取某工点最后一次施工工况日期失败.");
+					}
+				});
 				uni.navigateTo({
 					url: '../mypages/conditionAdd'
 				})
@@ -138,6 +144,14 @@
 		},
 		onLoad() {
 			this.getUnitEngineerings()
+		},
+		onShow() {
+			var pages= getCurrentPages();
+			var page = pages[pages.length - 1]
+			if(undefined != page.data.mode) {
+				this.localList.push(page.data.mode);
+				//console.log(this.conditionName)
+			}
 		}
 	}
 </script>
@@ -221,5 +235,9 @@
 
 	.segmented-control-item:first-child {
 		border-left-width: 0;
+	}
+	
+	.img-empty{
+		width: 500upx;height: 500upx;margin-top: 30upx;
 	}
 </style>

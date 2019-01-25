@@ -12,7 +12,7 @@
 				<view v-if="'Text' === list.DataType">
 					<view class="uni-input-row-item">
 						<label>{{list.DisplayName}}：</label>
-						<textarea class="uni-input-textarea" placeholder="请说明..."></textarea>
+						<textarea class="uni-input-textarea" v-model="text" placeholder="请说明..."></textarea>
 					</view>
 				</view>
 			</block>
@@ -31,10 +31,10 @@
 			</view>
 			<view class="uni-input-row-item">
 				<label>备注：</label>
-				<textarea class="uni-input-textarea" placeholder="请说明..."></textarea>
+				<textarea class="uni-input-textarea" v-model="mark" placeholder="请说明..."></textarea>
 			</view>
 		</view>
-		<button type="primary">确定</button>
+		<button type="primary" @click="conditionCreate">确定</button>
 	</view>
 </template>
 
@@ -44,8 +44,11 @@
 			return {
 				attributesList: [],
 				index: 0,
-				workState: ['施工中', '停工', '已竣工', '未开工'],
-				imageList: []
+				workState: ['施工中', '停工', '未开工', '已竣工'],
+				imageList: [],
+				mark: '',
+				text: '',
+				mode: ''
 			};
 		},
 		methods: {
@@ -87,11 +90,35 @@
 					current: current,
 					urls: this.imageList
 				})
+			},
+			conditionCreate() {
+				var parseSteps = JSON.parse(this.mode.Steps)
+				parseSteps.Status = this.index; // 施工状态
+				parseSteps.Mark = this.mark // 备注
+				var att = {
+					FieldName: this.text, // 文本
+					Value: this.index // 
+					// 照片 Datas: this.imageList
+				}
+				parseSteps.Attributes.push(JSON.stringify(att))
+				this.mode.Steps = parseSteps
+				//console.log("this.mode => "+ JSON.stringify(this.mode))
+				var pages = getCurrentPages();
+				//console.log("pages size => "+ pages.length)
+				var page = pages[pages.length - 1]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
+				page.setData({
+					mode: JSON.stringify(this.mode)
+				})
+				uni.navigateBack({
+					delta: page
+				})
 			}
 		},
 		onLoad(load) {
 			this.attributesList = JSON.parse(load.att);
-			console.log("att size " + this.attributesList.length + " => " + JSON.stringify(this.attributesList))
+			//console.log("att size " + this.attributesList.length + " => " + JSON.stringify(this.attributesList))
+			this.mode= JSON.parse(load.mode)
+			//console.log("this.mode => "+ JSON.stringify(this.mode))
 		}
 	}
 </script>

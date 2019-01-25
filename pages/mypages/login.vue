@@ -68,12 +68,15 @@
 							var obj = JSON.stringify(object.data);
 							//console.log(obj)
 							if (obj != "[]") {
-								// 本地存储信息
 								const user = {
 									account: object.data.UserName,
-									password: ""
+									password: "",
+									UnitID: object.data.UnitID,
+									UnitName: object.data.UnitName
 								};
+								// 本地存储用户信息
 								server.addUser(user);
+								// 储存工点信息
 								server.setPoints(object.data.Projects);
 								uni.switchTab({
 									url: './myself'

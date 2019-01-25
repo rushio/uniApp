@@ -12,22 +12,23 @@
 			</view>
 			<view class="uni-input-row-item">
 				<label>施工状态：(必填)</label>
-				<radio-group class="uni-flex" name="gender">
+				<radio-group class="uni-flex" name="gender" @change="radioChange">
 					<label>
-						<radio checked="true" value="" />施工中</label>
+						<radio checked="true" value="1" />施工中</label>
 					<label>
-						<radio value="" />停工</label>
+						<radio value="0" />停工</label>
 				</radio-group>
 			</view>
 			<view class="uni-input-row-item">
 				<label>日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;期：</label>
-				<input disabled="true" :value="todayDate" @click="getDatePicker()" />
-				<text class="iconfont" @click="getDatePicker">&#xe609;</text>
-				<date-picker v-model="showPicker" init="2018-12-24" type="date" @selected="onSelected" />
+				<picker mode="date" :value="todayDate" :start="startDate" :end="endDate" @change="bindDateChange">
+					<input disabled="true" :value="todayDate"/>
+				</picker>
+				<text class="iconfont" @click="bindDateChange">&#xe609;</text>
 			</view>
 			<view class="uni-input-row-item">
 				<label>补充说明：</label>
-				<textarea class="uni-input-textarea" placeholder="请说明..."></textarea>
+				<textarea class="uni-input-textarea" placeholder="请说明..." v-model="Mark"></textarea>
 			</view>
 		</view>
 		<button class="uni-common-mt" type="primary" @click="onNext">下一步</button>
@@ -35,28 +36,26 @@
 </template>
 <script>
 	import now from '../../common/date.js'
-	import datePicker from '../../components/date-picker/date-picker.vue'
 	import service from '../../common/service.js'
 	
 	export default {
-		components: {
-			datePicker
-		},
+		
 		data() {
 			return {
 				todayDate: '',
-				showPicker: false,
+				startDate: '0001-01-01',
+				endDate: '',
 				conditionName:'',
 				username: '',
-				siteId: ''
+				siteId: '',
+				Mark: '',
+				radioValue: 1
 			}
 		},
 		methods: {
-			getDatePicker() {
-				this.showPicker = true;
-			},
-			onSelected(date) {
-				this.todayDate = date.value;
+			radioChange: function(evt) {
+				//console.log("evt.value => "+ evt.target.value);
+				this.radioValue= evt.target.value;
 			},
 			onNext:function(){
 				if(undefined === this.conditionName || "" === this.conditionName) {
@@ -66,6 +65,19 @@
 					})
 					return;
 				}
+				// 生成工况的mode json用于提交
+				var mode = {
+					UnitID: service.getUsers()[0].unitid, // 创建人单位信息
+					UnitName: service.getUsers()[0].unitname, // 创建人单位信息
+					StepDate: this.todayDate, //日期
+					Status: this.radioValue, // 施工状态 => 返回数字
+					CreatorName: service.getUsers()[0].account, // 上传人
+					UploadDate: '', // 上传日期
+					CurrentSiteID: this.siteId, // 工点ID
+					Mark: this.Mark, // 补充说明
+					Title: this.conditionName, // 用于列表名称展示
+					Steps: [] //JSON.stringify()
+				}
 				// 获取工点下分区
 				uni.request({
 					url: service.SERVICE_URL+ 'MCsp/GetSiteAreas',
@@ -74,14 +86,13 @@
 					},
 					success(succ) {
 						if(succ.statusCode === 200) {
-							//console.log(succ.data.length+ " => "+ JSON.stringify(succ.data))
+							//console.log("succ.data size "+ succ.data.length+ " => "+ JSON.stringify(succ.data))
 							for (let i = 0; i < succ.data.length; i++) {
 								succ.data[i].CanSelect = false;
 							}
-							service.setPointLists(succ.data)
 							uni.navigateTo({
 								//url: './conditionPartition'
-								url: './conditionPartitionLeft'
+								url: './conditionPartitionLeft?pointLists='+ JSON.stringify(succ.data)+ '&mode='+ JSON.stringify(mode)
 							})
 						} else {
 							console.log(succ.statusCode)
@@ -100,11 +111,16 @@
 				uni.navigateTo({
 					url: './conditionSelect'
 				})
+			},
+			bindDateChange: function(e) {
+				this.todayDate = e.target.value
 			}
 		},
 		onLoad() {
 			this.todayDate = now.date;
+			this.endDate = now.date;
 			this.username = service.getUsers()[0].account;
+			this.startDate = service.getLastUploadDate();
 		},
 		onShow() {
 			var pages= getCurrentPages();
