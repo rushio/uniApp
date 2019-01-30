@@ -3,7 +3,7 @@ const USERS_KEY = 'USERS_KEY';
 const STATE_KEY = 'STATE_KEY';
 // 服务器地址
 //const SERVICE_URL = 'http://192.168.90.202:8080/';
-const SERVICE_URL = 'http://192.168.90.64:8080/';
+const SERVICE_URL = 'http://192.168.191.1:8080/';
 
 // 获取用户信息
 const getUsers = function () {

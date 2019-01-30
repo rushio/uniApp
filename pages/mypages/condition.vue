@@ -24,14 +24,17 @@
 			<view v-show="current === 0">
 				<view v-if="localList.length">
 					<view class="uni-list">
-						<view class="uni-list-cell" v-for="(item,index) in localList" :key="index">
-							<checkbox class="uni-list-cell-navigate-box"></checkbox>
-							<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover">
-								{{item.Title}}
-								<view class="uni-list-cell-navigate-date">{{item.StepDate}}</view>
+						<checkbox-group @change="checkboxChange">
+							<view class="uni-list-cell" v-for="(item,index) in localList" :key="index">
+								<checkbox class="uni-list-cell-navigate-box" :value="index"></checkbox>
+								<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover" @click="checkCondition(item)">
+									{{item.Title}}
+									<view class="uni-list-cell-navigate-date">{{item.StepDate}}</view>
+								</view>
 							</view>
-						</view>
+						</checkbox-group>
 					</view>
+					<button style="margin: 10upx;" type="primary" :disabled="submitList.length>0?false:true" @click="bindSubmit(item)">提交</button>
 				</view>
 				<view style="text-align: center;" v-else>
 					<image class="img-empty" src="../../static/img/network_error.png"></image>
@@ -39,7 +42,7 @@
 			</view>
 			<view v-show="current === 1">
 				<view class="uni-list">
-					<view class="uni-list-cell" v-for="(item,index) in commitList" :key="index">
+					<view class="uni-list-cell" v-for="(item,index) in submitedList" :key="index">
 						<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover">
 							{{item.title}}
 							<view class="uni-list-cell-navigate-date">{{item.date}}</view>
@@ -63,8 +66,9 @@
 				activeColor: '#007aff',
 				styleType: 'button',
 				titleList: ["未提交", "已提交"],
-				commitList: [],
-				localList: []
+				localList: [],
+				submitedList: [],
+				submitList: []
 			}
 		},
 		methods: {
@@ -98,6 +102,30 @@
 					fail() {
 						console.log("fail => 获取单位工程失败.")
 					}
+				})
+			},
+			checkboxChange: function(e) {
+				var items = this.localList,
+				    values = e.detail.value;
+					this.submitList = [];
+				for (var i = 0, lenI = items.length; i < lenI; ++i) {
+				    items[i].checked = false;
+				    for (var j = 0, lenJ = values.length; j < lenJ; ++j) {
+				        if (items.indexOf(items[i]) == values[j]) {
+				            items[i].checked = true;
+							this.submitList.push(items[i])
+				            break
+				        }
+				    }
+				}
+				//console.log("this.submitList size "+ this.submitList.length);
+			},
+			bindSubmit: function() {
+				
+			},
+			checkCondition: function(con) {
+				uni.navigateTo({
+					url: './conditionAdd?condition='+ JSON.stringify(con)
 				})
 			}
 		},
@@ -149,8 +177,9 @@
 			var pages= getCurrentPages();
 			var page = pages[pages.length - 1]
 			if(undefined != page.data.mode) {
-				this.localList.push(page.data.mode);
-				//console.log(this.conditionName)
+				this.localList.push(JSON.parse(page.data.mode));
+				//console.log("this.localList size "+ this.localList.length+ " => "+ this.localList[0].Title)
+				page.data.mode = undefined; // 设置undefined防止重复添加
 			}
 		}
 	}

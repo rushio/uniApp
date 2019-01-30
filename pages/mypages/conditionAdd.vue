@@ -14,21 +14,21 @@
 				<label>施工状态：(必填)</label>
 				<radio-group class="uni-flex" name="gender" @change="radioChange">
 					<label>
-						<radio checked="true" value="1" />施工中</label>
+						<radio :checked="radioValue==1?true:false" value="1" />施工中</label>
 					<label>
-						<radio value="0" />停工</label>
+						<radio :checked="radioValue==0?true:false" value="0" />停工</label>
 				</radio-group>
 			</view>
 			<view class="uni-input-row-item">
 				<label>日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;期：</label>
 				<picker mode="date" :value="todayDate" :start="startDate" :end="endDate" @change="bindDateChange">
-					<input disabled="true" :value="todayDate"/>
+					<input disabled="true" :value="todayDate" />
 				</picker>
 				<text class="iconfont" @click="bindDateChange">&#xe609;</text>
 			</view>
 			<view class="uni-input-row-item">
 				<label>补充说明：</label>
-				<textarea class="uni-input-textarea" placeholder="请说明..." v-model="Mark"></textarea>
+				<textarea class="uni-input-textarea" placeholder="请说明..." v-model="Mark" :value="Mark"></textarea>
 			</view>
 		</view>
 		<button class="uni-common-mt" type="primary" @click="onNext">下一步</button>
@@ -37,31 +37,32 @@
 <script>
 	import now from '../../common/date.js'
 	import service from '../../common/service.js'
-	
+
 	export default {
-		
+
 		data() {
 			return {
 				todayDate: '',
 				startDate: '0001-01-01',
 				endDate: '',
-				conditionName:'',
+				conditionName: '',
 				username: '',
 				siteId: '',
 				Mark: '',
-				radioValue: 1
+				radioValue: 1,
+				condition: ''
 			}
 		},
 		methods: {
 			radioChange: function(evt) {
 				//console.log("evt.value => "+ evt.target.value);
-				this.radioValue= evt.target.value;
+				this.radioValue = evt.target.value;
 			},
-			onNext:function(){
-				if(undefined === this.conditionName || "" === this.conditionName) {
+			onNext: function() {
+				if (undefined === this.conditionName || "" === this.conditionName) {
 					uni.showToast({
-						icon:'none',
-						title:'请选择工点.'
+						icon: 'none',
+						title: '请选择工点.'
 					})
 					return;
 				}
@@ -78,58 +79,78 @@
 					Title: this.conditionName, // 用于列表名称展示
 					Steps: [] //JSON.stringify()
 				}
-				// 获取工点下分区
-				uni.request({
-					url: service.SERVICE_URL+ 'MCsp/GetSiteAreas',
-					data: {
-						siteid: this.siteId
-					},
-					success(succ) {
-						if(succ.statusCode === 200) {
-							//console.log("succ.data size "+ succ.data.length+ " => "+ JSON.stringify(succ.data))
-							for (let i = 0; i < succ.data.length; i++) {
-								succ.data[i].CanSelect = false;
+				// 判断是新建工况还是检查工况
+				if (undefined === this.condition) {
+					// 新建：获取工点下分区
+					uni.request({
+						url: service.SERVICE_URL + 'MCsp/GetSiteAreas',
+						data: {
+							siteid: this.siteId
+						},
+						success(succ) {
+							if (succ.statusCode === 200) {
+								//console.log("succ.data size "+ succ.data.length+ " => "+ JSON.stringify(succ.data))
+								for (let i = 0; i < succ.data.length; i++) {
+									succ.data[i].CanSelect = false;
+								}
+								uni.navigateTo({
+									//url: './conditionPartition'
+									url: './conditionPartitionLeft?pointLists=' + JSON.stringify(succ.data) + '&mode=' + JSON.stringify(mode)
+								})
+							} else {
+								console.log(succ.statusCode)
+								uni.showToast({
+									icon: 'none',
+									title: '获取分区失败.'
+								});
 							}
-							uni.navigateTo({
-								//url: './conditionPartition'
-								url: './conditionPartitionLeft?pointLists='+ JSON.stringify(succ.data)+ '&mode='+ JSON.stringify(mode)
-							})
-						} else {
-							console.log(succ.statusCode)
-							uni.showToast({
-								icon: 'none',
-								title: '获取分区失败.'
-							});
+						},
+						fail() {
+							console.log('fail => 获取分区失败.')
 						}
-					},
-					fail() {
-						console.log('fail => 获取分区失败.')
-					}
-				})
+					})
+				} else {
+					
+				}
 			},
-			selGongDian(){
-				uni.navigateTo({
-					url: './conditionSelect'
-				})
+			selGongDian() {
+				// 判断是否检查工况
+				if (undefined == this.condition) {
+					uni.navigateTo({
+						url: './conditionSelect'
+					})
+				}
 			},
 			bindDateChange: function(e) {
 				this.todayDate = e.target.value
 			}
 		},
-		onLoad() {
+		onLoad(load) {
 			this.todayDate = now.date;
 			this.endDate = now.date;
 			this.username = service.getUsers()[0].account;
 			this.startDate = service.getLastUploadDate();
+			if (undefined != load.condition) {
+				// 初始化工况要检查的数据
+				var con = JSON.parse(load.condition);
+				this.condition = con;
+				//console.log("load.condition => "+ load.condition);
+				this.conditionName = con.Title;
+				this.radioValue = con.Status;
+				this.todayDate = con.StepDate;
+				this.Mark = con.Mark;
+			} else {
+				this.condition = undefined;
+			}
 		},
 		onShow() {
-			var pages= getCurrentPages();
+			var pages = getCurrentPages();
 			var page = pages[pages.length - 1]
-			if(undefined != page.data.point) {
+			if (undefined != page.data.point) {
 				this.conditionName = page.data.point;
 				//console.log(this.conditionName)
 			}
-			if(undefined != page.data.siteId) {
+			if (undefined != page.data.siteId) {
 				this.siteId = page.data.siteId;
 				//console.log(this.siteId)
 			}
@@ -174,7 +195,7 @@
 	}
 
 	button {
-		margin:10upx;
+		margin: 10upx;
 		background: #0FAEFF;
 	}
 

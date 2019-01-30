@@ -104,13 +104,12 @@
 				this.mode.Steps = parseSteps
 				//console.log("this.mode => "+ JSON.stringify(this.mode))
 				var pages = getCurrentPages();
-				//console.log("pages size => "+ pages.length)
-				var page = pages[pages.length - 1]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
+				var page = pages[pages.length - 4]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
 				page.setData({
 					mode: JSON.stringify(this.mode)
 				})
 				uni.navigateBack({
-					delta: page
+					delta: 3
 				})
 			}
 		},
