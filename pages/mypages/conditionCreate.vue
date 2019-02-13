@@ -12,7 +12,7 @@
 				<view v-if="'Text' === list.DataType">
 					<view class="uni-input-row-item">
 						<label>{{list.DisplayName}}：</label>
-						<textarea class="uni-input-textarea" v-model="text" placeholder="请说明..."></textarea>
+						<textarea class="uni-input-textarea" v-model="text" :value="text" placeholder="请说明..."></textarea>
 					</view>
 				</view>
 			</block>
@@ -31,7 +31,7 @@
 			</view>
 			<view class="uni-input-row-item">
 				<label>备注：</label>
-				<textarea class="uni-input-textarea" v-model="mark" placeholder="请说明..."></textarea>
+				<textarea class="uni-input-textarea" v-model="mark" :value="mark" placeholder="请说明..."></textarea>
 			</view>
 		</view>
 		<button type="primary" @click="conditionCreate">确定</button>
@@ -48,7 +48,9 @@
 				imageList: [],
 				mark: '',
 				text: '',
-				mode: ''
+				mode: '',
+				condition: '',
+				taskId: ''
 			};
 		},
 		methods: {
@@ -92,32 +94,68 @@
 				})
 			},
 			conditionCreate() {
-				var parseSteps = JSON.parse(this.mode.Steps)
-				parseSteps.Status = this.index; // 施工状态
-				parseSteps.Mark = this.mark // 备注
 				var att = {
 					FieldName: this.text, // 文本
-					Value: this.index // 
-					// 照片 Datas: this.imageList
+					Value: this.index, // 
+					Datas: this.imageList // 照片
 				}
-				parseSteps.Attributes.push(JSON.stringify(att))
-				this.mode.Steps = parseSteps
-				//console.log("this.mode => "+ JSON.stringify(this.mode))
 				var pages = getCurrentPages();
 				var page = pages[pages.length - 4]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
-				page.setData({
-					mode: JSON.stringify(this.mode)
-				})
+				if (undefined === this.condition || "" === this.condition) {
+					var parseSteps = JSON.parse(this.mode.Steps)
+					parseSteps.Status = this.index; // 施工状态
+					parseSteps.Mark = this.mark // 备注
+					parseSteps.Attributes.push(JSON.stringify(att))
+					this.mode.Steps = []
+					this.mode.Steps.push(parseSteps)
+					//console.log("this.mode => "+ JSON.stringify(this.mode))
+					page.setData({
+						mode: JSON.stringify(this.mode)
+					})
+				} else {
+					for (var i = 0; i < this.condition.Steps.length; i++) {
+						if(this.taskId === this.condition.Steps[i].TaskItemID) {
+							this.condition.Steps[i].Status = this.index
+							this.condition.Steps[i].Mark = this.mark
+							this.condition.Steps[i].Attributes = []
+							this.condition.Steps[i].Attributes.push(att)
+						}
+					}
+				}
 				uni.navigateBack({
 					delta: 3
 				})
 			}
 		},
 		onLoad(load) {
-			this.attributesList = JSON.parse(load.att);
-			//console.log("att size " + this.attributesList.length + " => " + JSON.stringify(this.attributesList))
-			this.mode= JSON.parse(load.mode)
-			//console.log("this.mode => "+ JSON.stringify(this.mode))
+			if(undefined != load.att && "" != JSON.parse(load.att)) {
+				this.attributesList = JSON.parse(load.att);
+				//console.log("att size " + this.attributesList.length + " => " + JSON.stringify(this.attributesList))
+			}
+			if(undefined != load.mode && "" != JSON.parse(load.mode)) {
+				this.mode= JSON.parse(load.mode)
+				//console.log("this.mode => "+ JSON.stringify(this.mode))
+			}
+			if(undefined != load.taskId && "" != JSON.parse(load.taskId)) {
+				this.taskId = load.taskId
+				//console.log("this.taskId => "+ this.taskId)
+			}
+			if (undefined != load.condition && "" != JSON.parse(load.condition)) {
+				this.condition= JSON.parse(load.condition)
+				//console.log("this.condition => "+ JSON.stringify(this.condition));
+				// 如果是之前录入过的重新检查需要重新赋值（boolean值传过来是字符串格式，需要转换）
+				if (JSON.parse(load.checked)) {
+					for (var i = 0; i < this.condition.Steps.length; i++) {
+						if(load.taskId === this.condition.Steps[i].TaskItemID) {
+							this.index = this.condition.Steps[i].Status
+							var att = JSON.parse(this.condition.Steps[i].Attributes)
+							this.text = att.FieldName
+							this.imageList = att.Datas
+							this.mark = this.condition.Steps[i].Mark
+						}
+					}
+				}
+			}
 		}
 	}
 </script>

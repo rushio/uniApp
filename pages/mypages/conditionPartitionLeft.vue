@@ -18,8 +18,8 @@
 							</view>
 							<view class="uni-list uni-collapse" :class="list.IsSite ? 'uni-active' : ''">
 								<view class="uni-list-cell" hover-class="uni-list-cell-hover" v-for="(item,key) in list.items" :key="key"
-								 :class="key === list.items.length - 1 ? 'uni-list-cell-last' : ''" @click="toConditionCreate(item.id, list.Data.Attributes)">
-									<view class="uni-list-cell-navigate"> {{item.name}} </view>
+								 :class="key === list.items.length - 1 ? 'uni-list-cell-last' : ''" @click="toConditionCreate(item.id, list.Data.Attributes, item.checked)">
+									<view class="uni-list-cell-navigate" :class="item.checked? 'item-checked':''"> {{item.name}} </view>
 								</view>
 							</view>
 						</view>
@@ -46,7 +46,8 @@
 				mode: '',
 				partitionValue: '',
 				subID: '',
-				subName: ''
+				subName: '',
+				condition: ''
 			}
 		},
 		methods: {
@@ -73,7 +74,7 @@
 			 * id：表示工序的id
 			 * attributes：表示工序的att
 			 */
-			toConditionCreate(id, attributes) {
+			toConditionCreate(id, attributes, checked) {
 				var step = { //JSON.stringify()
 					AreaID: this.partitionValue, // 分区 => Value
 					SubItemID: this.subID, //分部分项id
@@ -85,9 +86,17 @@
 					Mark: '',
 					Attributes: [] //JSON.stringify()
 				}
-				this.mode.Steps.push(JSON.stringify(step));
+				// 判断是新增工况录入还是复查工况录入
+				if (undefined === this.condition || "" === this.condition) {
+					this.mode.Steps.push(JSON.stringify(step));
+				} else {
+					// 复查工况没有检查过的工况
+					if (!checked) {
+						this.condition.Steps.push(step)
+					}
+				}
 				uni.navigateTo({
-					url: './conditionCreate?att=' + attributes + "&mode=" + JSON.stringify(this.mode)
+					url: './conditionCreate?att=' + attributes + "&mode=" + JSON.stringify(this.mode)+ '&condition=' + JSON.stringify(this.condition) + "&checked=" + checked+ "&taskId="+ id
 				})
 			},
 			trigerCollapse(sub, e) {
@@ -102,14 +111,35 @@
 						this.subItemLists[i].IsSite = false;
 					}
 				}
+				// 判断是否检查工况，根据checked添加背景色标识
+				if (undefined != this.condition && "" != this.condition) {
+					for (var list = 0; list < this.subItemLists.length; list++) {
+						for (var item = 0; item < this.subItemLists[list].items.length; item++) {
+							for (var step = 0; step < this.condition.Steps.length; step++) {
+								//console.log("item.id => "+ this.subItemLists[list].items[item].id+ " --- steps.ID => "+ this.condition.Steps[step].TaskItemID);
+								if (this.subItemLists[list].items[item].id === this.condition.Steps[step].TaskItemID) {
+									this.subItemLists[list].items[item].checked = true;
+								}
+							}
+						}
+					}
+				}
 			}
 		},
 		onLoad: function(load) {
 			this.height = uni.getSystemInfoSync().windowHeight;
-			this.mode = JSON.parse(load.mode)
-			//console.log("model => "+ JSON.stringify(this.mode))
-			this.partitionLists = JSON.parse(load.pointLists);
-			//console.log("partitionLists size "+ this.partitionLists.length+ " => "+ JSON.stringify(this.partitionLists))
+			if (undefined != load.mode) {
+				this.mode = JSON.parse(load.mode)
+				//console.log("model => "+ JSON.stringify(this.mode))
+			}
+			if (undefined != load.pointLists) {
+				this.partitionLists = JSON.parse(load.pointLists);
+				//console.log("partitionLists size "+ this.partitionLists.length+ " => "+ JSON.stringify(this.partitionLists))
+			}
+			if (undefined != load.condition) {
+				this.condition = JSON.parse(load.condition)
+				//console.log("this.condition => "+ JSON.stringify(this.condition));
+			}
 			// getUnitEngineeringLists获取本地的所有单位工程
 			this.unitEngineeringLists = service.getUnitEngineeringLists();
 			if (1 <= this.partitionLists.length) {
@@ -165,5 +195,9 @@
 
 	.active {
 		color: #007AFF;
+	}
+
+	.item-checked {
+		background: #E097B4;
 	}
 </style>

@@ -110,7 +110,34 @@
 						}
 					})
 				} else {
-					
+					var vCondition = this.condition;
+					// 检查：获取工点下分区
+					uni.request({
+						url: service.SERVICE_URL + 'MCsp/GetSiteAreas',
+						data: {
+							siteid: this.condition.CurrentSiteID
+						},
+						success(succ) {
+							if (succ.statusCode === 200) {
+								//console.log("succ.data size "+ succ.data.length+ " => "+ JSON.stringify(succ.data))
+								for (let i = 0; i < succ.data.length; i++) {
+									succ.data[i].CanSelect = false;
+								}
+								uni.navigateTo({
+									url: './conditionPartitionLeft?pointLists=' + JSON.stringify(succ.data)+ '&condition='+ JSON.stringify(vCondition)
+								})
+							} else {
+								console.log(succ.statusCode)
+								uni.showToast({
+									icon: 'none',
+									title: '获取分区失败.'
+								});
+							}
+						},
+						fail() {
+							console.log('fail => 获取分区失败.')
+						}
+					})
 				}
 			},
 			selGongDian() {
