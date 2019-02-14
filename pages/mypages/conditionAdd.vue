@@ -77,7 +77,7 @@
 					CurrentSiteID: this.siteId, // 工点ID
 					Mark: this.Mark, // 补充说明
 					Title: this.conditionName, // 用于列表名称展示
-					Steps: [] //JSON.stringify()
+					Steps:[] //JSON.stringify()
 				}
 				// 判断是新建工况还是检查工况
 				if (undefined === this.condition) {
@@ -107,6 +107,10 @@
 						},
 						fail() {
 							console.log('fail => 获取分区失败.')
+							uni.showToast({
+								icon: 'none',
+								title: '获取分区失败.'
+							});
 						}
 					})
 				} else {

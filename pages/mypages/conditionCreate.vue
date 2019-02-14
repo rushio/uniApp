@@ -102,15 +102,17 @@
 				var pages = getCurrentPages();
 				var page = pages[pages.length - 4]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
 				if (undefined === this.condition || "" === this.condition) {
-					var parseSteps = JSON.parse(this.mode.Steps)
+					var parseSteps = this.mode.Steps[0]
+					// console.log("parseSteps => "+ JSON.stringify(parseSteps));
 					parseSteps.Status = this.index; // 施工状态
 					parseSteps.Mark = this.mark // 备注
-					parseSteps.Attributes.push(JSON.stringify(att))
+					parseSteps.Attributes.push(att)
 					this.mode.Steps = []
 					this.mode.Steps.push(parseSteps)
 					//console.log("this.mode => "+ JSON.stringify(this.mode))
 					page.setData({
-						mode: JSON.stringify(this.mode)
+						mode: JSON.stringify(this.mode),
+						checked: false
 					})
 				} else {
 					for (var i = 0; i < this.condition.Steps.length; i++) {
@@ -119,6 +121,10 @@
 							this.condition.Steps[i].Mark = this.mark
 							this.condition.Steps[i].Attributes = []
 							this.condition.Steps[i].Attributes.push(att)
+							page.setData({
+								mode: JSON.stringify(this.condition),
+								checked: true
+							})
 						}
 					}
 				}
@@ -130,13 +136,13 @@
 		onLoad(load) {
 			if(undefined != load.att && "" != JSON.parse(load.att)) {
 				this.attributesList = JSON.parse(load.att);
-				//console.log("att size " + this.attributesList.length + " => " + JSON.stringify(this.attributesList))
+				//console.log("this.attributesList => " + JSON.stringify(this.attributesList))
 			}
 			if(undefined != load.mode && "" != JSON.parse(load.mode)) {
 				this.mode= JSON.parse(load.mode)
 				//console.log("this.mode => "+ JSON.stringify(this.mode))
 			}
-			if(undefined != load.taskId && "" != JSON.parse(load.taskId)) {
+			if(undefined != load.taskId && "" != load.taskId) {
 				this.taskId = load.taskId
 				//console.log("this.taskId => "+ this.taskId)
 			}
@@ -148,7 +154,7 @@
 					for (var i = 0; i < this.condition.Steps.length; i++) {
 						if(load.taskId === this.condition.Steps[i].TaskItemID) {
 							this.index = this.condition.Steps[i].Status
-							var att = JSON.parse(this.condition.Steps[i].Attributes)
+							var att = this.condition.Steps[i].Attributes[0]
 							this.text = att.FieldName
 							this.imageList = att.Datas
 							this.mark = this.condition.Steps[i].Mark

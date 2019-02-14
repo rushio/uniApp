@@ -27,14 +27,14 @@
 						<checkbox-group @change="checkboxChange">
 							<view class="uni-list-cell" v-for="(item,index) in localList" :key="index">
 								<checkbox class="uni-list-cell-navigate-box" :value="index"></checkbox>
-								<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover" @click="checkCondition(item)">
+								<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover" @click="checkCondition(index,item)">
 									{{item.Title}}
 									<view class="uni-list-cell-navigate-date">{{item.StepDate}}</view>
 								</view>
 							</view>
 						</checkbox-group>
 					</view>
-					<button style="margin: 10upx;" type="primary" :disabled="submitList.length>0?false:true" @click="bindSubmit(item)">提交</button>
+					<button style="margin: 10upx;" type="primary" :disabled="submitList.length>0?false:true" @click="bindSubmit()">提交</button>
 				</view>
 				<view style="text-align: center;" v-else>
 					<image class="img-empty" src="../../static/img/network_error.png"></image>
@@ -68,7 +68,8 @@
 				titleList: ["未提交", "已提交"],
 				localList: [],
 				submitedList: [],
-				submitList: []
+				submitList: [],
+				listIndex: 0
 			}
 		},
 		methods: {
@@ -83,12 +84,12 @@
 					this.current = index;
 				}
 			},
-			getUnitEngineerings () {
+			getUnitEngineerings() {
 				// 获取所有单位工程
 				uni.request({
-					url: service.SERVICE_URL+ 'MCsp/GetAllUnitEngineerings',
+					url: service.SERVICE_URL + 'MCsp/GetAllUnitEngineerings',
 					success(succ) {
-						if(succ.statusCode === 200){
+						if (succ.statusCode === 200) {
 							//console.log("data size "+ succ.data.length+ " => "+ JSON.stringify(succ.data[0]))
 							service.setUnitEngineeringLists(succ.data)
 						} else {
@@ -106,26 +107,41 @@
 			},
 			checkboxChange: function(e) {
 				var items = this.localList,
-				    values = e.detail.value;
-					this.submitList = [];
+					values = e.detail.value;
+				this.submitList = [];
 				for (var i = 0, lenI = items.length; i < lenI; ++i) {
-				    items[i].checked = false;
-				    for (var j = 0, lenJ = values.length; j < lenJ; ++j) {
-				        if (items.indexOf(items[i]) == values[j]) {
-				            items[i].checked = true;
+					items[i].checked = false;
+					for (var j = 0, lenJ = values.length; j < lenJ; ++j) {
+						if (items.indexOf(items[i]) == values[j]) {
+							items[i].checked = true;
 							this.submitList.push(items[i])
-				            break
-				        }
-				    }
+							break
+						}
+					}
 				}
 				//console.log("this.submitList size "+ this.submitList.length);
 			},
 			bindSubmit: function() {
-				
+				console.log("this.submitList => "+ JSON.stringify(this.submitList));
+				/* uni.request({
+					url: service.SERVICE_URL + 'MCsp/Save',
+					method: 'POST',
+					header:{
+						'content-type':"application/x-www-form-urlencoded"
+					},
+					data: this.submitList[0],
+					success(succ) {
+						console.log("succ => " + JSON.stringify(succ));
+					},
+					fail() {
+						console.log("fain");
+					}
+				}) */
 			},
-			checkCondition: function(con) {
+			checkCondition: function(index, con) {
+				this.listIndex = index;
 				uni.navigateTo({
-					url: './conditionAdd?condition='+ JSON.stringify(con)
+					url: './conditionAdd?condition=' + JSON.stringify(con)
 				})
 			}
 		},
@@ -134,7 +150,7 @@
 			if (data.index === 0) {
 				// 获取某工点最后一次施工工况日期
 				uni.request({
-					url: service.SERVICE_URL+ 'MCsp/GetLastUploadDate',
+					url: service.SERVICE_URL + 'MCsp/GetLastUploadDate',
 					method: 'GET',
 					data: {},
 					success: res => {
@@ -174,10 +190,15 @@
 			this.getUnitEngineerings()
 		},
 		onShow() {
-			var pages= getCurrentPages();
+			var pages = getCurrentPages();
 			var page = pages[pages.length - 1]
-			if(undefined != page.data.mode) {
-				this.localList.push(JSON.parse(page.data.mode));
+			if (undefined != page.data.mode) {
+				//console.log("data.mode => "+ page.data.mode);
+				if (page.data.checked) {
+					this.localList.splice(this.listIndex, 1, JSON.parse(page.data.mode));
+				} else {
+					this.localList.push(JSON.parse(page.data.mode))
+				}
 				//console.log("this.localList size "+ this.localList.length+ " => "+ this.localList[0].Title)
 				page.data.mode = undefined; // 设置undefined防止重复添加
 			}
@@ -265,8 +286,10 @@
 	.segmented-control-item:first-child {
 		border-left-width: 0;
 	}
-	
-	.img-empty{
-		width: 500upx;height: 500upx;margin-top: 30upx;
+
+	.img-empty {
+		width: 500upx;
+		height: 500upx;
+		margin-top: 30upx;
 	}
 </style>

@@ -22,7 +22,7 @@
 	export default {
 		data() {
 			return {
-				lists: []
+				lists: ["察数组","的变异","方法，所以","它们也将会触发视","图更新。这些方法"]
 			};
 		},
 		methods: {
@@ -46,10 +46,10 @@
 				index   必需。规定从何处添加/删除元素。该参数是开始插入和（或）删除的数组元素的下标，必须是数字。
 				howmany 必需。规定应该删除多少元素。必须是数字，但可以是 "0"。如果未规定此参数，则删除从 index 开始到原数组结尾的所有元素。
 				item1, ..., itemX 可选。要添加到数组的新元素 */
-				this.lists.splice(0, 1, this.getRandom());
+				this.lists.splice(1, 2, this.getRandom());
 			},
 			sort: function(){
-				this.lists.sort();
+				this.lists.sort();     
 			},
 			reverse:function(){
 				this.lists.reverse();

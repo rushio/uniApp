@@ -84,19 +84,28 @@
 					CspTaskItemID: '', //
 					Status: '', // 表示施工状态共4种 => 数字
 					Mark: '',
-					Attributes: [] //JSON.stringify()
+					Attributes: [] 
 				}
 				// 判断是新增工况录入还是复查工况录入
 				if (undefined === this.condition || "" === this.condition) {
-					this.mode.Steps.push(JSON.stringify(step));
+					this.mode.Steps.push(step)
 				} else {
 					// 复查工况没有检查过的工况
 					if (!checked) {
-						this.condition.Steps.push(step)
+						var count = 0;
+						for (var i = 0; i < this.condition.Steps.length; i++) {
+							if(id === this.condition.Steps[i].TaskItemID) {
+								count = count+ 1;
+							}
+						}
+						if(count <= 0) {
+							this.condition.Steps.push(step)
+						}
 					}
 				}
 				uni.navigateTo({
-					url: './conditionCreate?att=' + attributes + "&mode=" + JSON.stringify(this.mode)+ '&condition=' + JSON.stringify(this.condition) + "&checked=" + checked+ "&taskId="+ id
+					url: './conditionCreate?att=' + attributes + "&mode=" + JSON.stringify(this.mode) + '&condition=' + JSON.stringify(
+						this.condition) + "&checked=" + checked + "&taskId=" + id
 				})
 			},
 			trigerCollapse(sub, e) {
@@ -111,40 +120,38 @@
 						this.subItemLists[i].IsSite = false;
 					}
 				}
-				// 判断是否检查工况，根据checked添加背景色标识
-				if (undefined != this.condition && "" != this.condition) {
-					for (var list = 0; list < this.subItemLists.length; list++) {
-						for (var item = 0; item < this.subItemLists[list].items.length; item++) {
-							for (var step = 0; step < this.condition.Steps.length; step++) {
-								//console.log("item.id => "+ this.subItemLists[list].items[item].id+ " --- steps.ID => "+ this.condition.Steps[step].TaskItemID);
-								if (this.subItemLists[list].items[item].id === this.condition.Steps[step].TaskItemID) {
-									this.subItemLists[list].items[item].checked = true;
-								}
-							}
-						}
-					}
-				}
 			}
 		},
 		onLoad: function(load) {
 			this.height = uni.getSystemInfoSync().windowHeight;
-			if (undefined != load.mode) {
-				this.mode = JSON.parse(load.mode)
-				//console.log("model => "+ JSON.stringify(this.mode))
-			}
 			if (undefined != load.pointLists) {
 				this.partitionLists = JSON.parse(load.pointLists);
 				//console.log("partitionLists size "+ this.partitionLists.length+ " => "+ JSON.stringify(this.partitionLists))
-			}
-			if (undefined != load.condition) {
-				this.condition = JSON.parse(load.condition)
-				//console.log("this.condition => "+ JSON.stringify(this.condition));
 			}
 			// getUnitEngineeringLists获取本地的所有单位工程
 			this.unitEngineeringLists = service.getUnitEngineeringLists();
 			if (1 <= this.partitionLists.length) {
 				// 初始化第一个分区的分部分项
 				this.getSubItemLists(this.partitionLists[0], 0)
+			}
+			if (undefined != load.mode) {
+				this.mode = JSON.parse(load.mode)
+				//console.log("model => "+ JSON.stringify(this.mode))
+			}
+			if (undefined != load.condition) {
+				this.condition = JSON.parse(load.condition)
+				//console.log("this.condition => "+ JSON.stringify(this.condition));
+				// 判断是否检查工况，根据checked添加背景色标识
+				for (var list = 0; list < this.subItemLists.length; list++) {
+					for (var item = 0; item < this.subItemLists[list].items.length; item++) {
+						for (var step = 0; step < this.condition.Steps.length; step++) {
+							//console.log("item.id => "+ this.subItemLists[list].items[item].id+ " --- steps.ID => "+ this.condition.Steps[step].TaskItemID);
+							if (this.subItemLists[list].items[item].id === this.condition.Steps[step].TaskItemID) {
+								this.subItemLists[list].items[item].checked = true;
+							}
+						}
+					}
+				}
 			}
 		}
 	}
