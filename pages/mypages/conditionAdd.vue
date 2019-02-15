@@ -4,7 +4,7 @@
 		<view class="uni-input-group">
 			<view class="uni-input-row-item">
 				<label>工点(必填)：</label>
-				<input disabled="true" @click="selGongDian" :value="conditionName" placeholder="请选择工点..." />
+				<input disabled="true" @click="conditionChecked" :value="conditionName" placeholder="请选择工点..." />
 			</view>
 			<view class="uni-input-row-item">
 				<label>填&nbsp;&nbsp;&nbsp;&nbsp;报&nbsp;&nbsp;&nbsp;人：</label>
@@ -31,7 +31,7 @@
 				<textarea class="uni-input-textarea" placeholder="请说明..." v-model="Mark" :value="Mark"></textarea>
 			</view>
 		</view>
-		<button class="uni-common-mt" type="primary" @click="onNext">下一步</button>
+		<button class="uni-common-mt" type="primary" @click="toConditionPartitionLeft()">下一步</button>
 	</view>
 </template>
 <script>
@@ -39,7 +39,6 @@
 	import service from '../../common/service.js'
 
 	export default {
-
 		data() {
 			return {
 				todayDate: '',
@@ -50,7 +49,8 @@
 				siteId: '',
 				Mark: '',
 				radioValue: 1,
-				condition: ''
+				conditionMode: '',
+				checked: false
 			}
 		},
 		methods: {
@@ -58,7 +58,7 @@
 				//console.log("evt.value => "+ evt.target.value);
 				this.radioValue = evt.target.value;
 			},
-			onNext: function() {
+			toConditionPartitionLeft: function() {
 				if (undefined === this.conditionName || "" === this.conditionName) {
 					uni.showToast({
 						icon: 'none',
@@ -77,76 +77,51 @@
 					CurrentSiteID: this.siteId, // 工点ID
 					Mark: this.Mark, // 补充说明
 					Title: this.conditionName, // 用于列表名称展示
-					Steps:[] //JSON.stringify()
+					Steps: [] //JSON.stringify()
 				}
-				// 判断是新建工况还是检查工况
-				if (undefined === this.condition) {
-					// 新建：获取工点下分区
-					uni.request({
-						url: service.SERVICE_URL + 'MCsp/GetSiteAreas',
-						data: {
-							siteid: this.siteId
-						},
-						success(succ) {
-							if (succ.statusCode === 200) {
-								//console.log("succ.data size "+ succ.data.length+ " => "+ JSON.stringify(succ.data))
-								for (let i = 0; i < succ.data.length; i++) {
-									succ.data[i].CanSelect = false;
-								}
-								uni.navigateTo({
-									//url: './conditionPartition'
-									url: './conditionPartitionLeft?pointLists=' + JSON.stringify(succ.data) + '&mode=' + JSON.stringify(mode)
-								})
-							} else {
-								console.log(succ.statusCode)
-								uni.showToast({
-									icon: 'none',
-									title: '获取分区失败.'
-								});
+				var id = this.siteId,conMode = mode,checked = this.checked
+				// 判断是新建工况还是检查工况 新建false：获取工点下分区，否则true获取当前工况下ID
+				if (this.checked) {
+					id = this.conditionMode.CurrentSiteID
+					conMode = this.conditionMode
+				}
+				uni.request({
+					url: service.SERVICE_URL + 'MCsp/GetSiteAreas',
+					data: {
+						siteid: id
+					},
+					success(succ) {
+						if (succ.statusCode === 200) {
+							//console.log("succ.data size "+ succ.data.length+ " => "+ JSON.stringify(succ.data))
+							for (let i = 0; i < succ.data.length; i++) {
+								succ.data[i].CanSelect = false;
 							}
-						},
-						fail() {
-							console.log('fail => 获取分区失败.')
+							//console.log("conMode => "+ JSON.stringify(conMode));
+							uni.navigateTo({
+								//url: './conditionPartition'
+								url: './conditionPartitionLeft?pointLists=' + JSON.stringify(succ.data) + 
+								'&conditionMode=' + JSON.stringify(conMode) + "&checked=" + checked
+							})
+						} else {
+							console.log("获取分区失败 => " + succ.statusCode)
 							uni.showToast({
 								icon: 'none',
 								title: '获取分区失败.'
 							});
 						}
-					})
-				} else {
-					var vCondition = this.condition;
-					// 检查：获取工点下分区
-					uni.request({
-						url: service.SERVICE_URL + 'MCsp/GetSiteAreas',
-						data: {
-							siteid: this.condition.CurrentSiteID
-						},
-						success(succ) {
-							if (succ.statusCode === 200) {
-								//console.log("succ.data size "+ succ.data.length+ " => "+ JSON.stringify(succ.data))
-								for (let i = 0; i < succ.data.length; i++) {
-									succ.data[i].CanSelect = false;
-								}
-								uni.navigateTo({
-									url: './conditionPartitionLeft?pointLists=' + JSON.stringify(succ.data)+ '&condition='+ JSON.stringify(vCondition)
-								})
-							} else {
-								console.log(succ.statusCode)
-								uni.showToast({
-									icon: 'none',
-									title: '获取分区失败.'
-								});
-							}
-						},
-						fail() {
-							console.log('fail => 获取分区失败.')
-						}
-					})
-				}
+					},
+					fail() {
+						console.log('fail => 获取分区失败.')
+						uni.showToast({
+							icon: 'none',
+							title: '请检查网络或服务.'
+						});
+					}
+				})
 			},
-			selGongDian() {
+			conditionChecked() {
 				// 判断是否检查工况
-				if (undefined == this.condition) {
+				if (undefined === this.conditionMode || "" === this.conditionMode) {
 					uni.navigateTo({
 						url: './conditionSelect'
 					})
@@ -161,17 +136,18 @@
 			this.endDate = now.date;
 			this.username = service.getUsers()[0].account;
 			this.startDate = service.getLastUploadDate();
-			if (undefined != load.condition) {
+			if (undefined != load.conditionMode && "" != load.conditionMode) {
 				// 初始化工况要检查的数据
-				var con = JSON.parse(load.condition);
-				this.condition = con;
-				//console.log("load.condition => "+ load.condition);
-				this.conditionName = con.Title;
-				this.radioValue = con.Status;
-				this.todayDate = con.StepDate;
-				this.Mark = con.Mark;
-			} else {
-				this.condition = undefined;
+				this.conditionMode = JSON.parse(load.conditionMode);
+				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode));
+				this.conditionName = this.conditionMode.Title;
+				this.radioValue = this.conditionMode.Status;
+				this.todayDate = this.conditionMode.StepDate;
+				this.Mark = this.conditionMode.Mark;
+			}
+			if (undefined != load.checked && "" != load.checked) {
+				this.checked = load.checked;
+				//console.log("this.checked => "+ this.checked);
 			}
 		},
 		onShow() {

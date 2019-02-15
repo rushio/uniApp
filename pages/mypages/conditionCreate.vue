@@ -48,8 +48,7 @@
 				imageList: [],
 				mark: '',
 				text: '',
-				mode: '',
-				condition: '',
+				conditionMode: '',
 				taskId: ''
 			};
 		},
@@ -100,36 +99,21 @@
 					Datas: this.imageList // 照片
 				}
 				var pages = getCurrentPages();
-				var page = pages[pages.length - 4]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
-				if (undefined === this.condition || "" === this.condition) {
-					var parseSteps = this.mode.Steps[0]
-					// console.log("parseSteps => "+ JSON.stringify(parseSteps));
-					parseSteps.Status = this.index; // 施工状态
-					parseSteps.Mark = this.mark // 备注
-					parseSteps.Attributes.push(att)
-					this.mode.Steps = []
-					this.mode.Steps.push(parseSteps)
-					//console.log("this.mode => "+ JSON.stringify(this.mode))
-					page.setData({
-						mode: JSON.stringify(this.mode),
-						checked: false
-					})
-				} else {
-					for (var i = 0; i < this.condition.Steps.length; i++) {
-						if(this.taskId === this.condition.Steps[i].TaskItemID) {
-							this.condition.Steps[i].Status = this.index
-							this.condition.Steps[i].Mark = this.mark
-							this.condition.Steps[i].Attributes = []
-							this.condition.Steps[i].Attributes.push(att)
-							page.setData({
-								mode: JSON.stringify(this.condition),
-								checked: true
-							})
-						}
+				var page = pages[pages.length - 2]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
+				for (var i = 0; i < this.conditionMode.Steps.length; i++) {
+					if(this.taskId === this.conditionMode.Steps[i].TaskItemID) {
+						this.conditionMode.Steps[i].Status = this.index; // 施工状态
+						this.conditionMode.Steps[i].Mark = this.mark // 备注
+						this.conditionMode.Steps[i].Attributes = []
+						this.conditionMode.Steps[i].Attributes.push(att)
 					}
 				}
+				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode))
+				page.setData({
+					conditionMode: JSON.stringify(this.conditionMode)
+				})
 				uni.navigateBack({
-					delta: 3
+					delta: 1
 				})
 			}
 		},
@@ -138,9 +122,20 @@
 				this.attributesList = JSON.parse(load.att);
 				//console.log("this.attributesList => " + JSON.stringify(this.attributesList))
 			}
-			if(undefined != load.mode && "" != JSON.parse(load.mode)) {
-				this.mode= JSON.parse(load.mode)
-				//console.log("this.mode => "+ JSON.stringify(this.mode))
+			if(undefined != load.conditionMode && "" != JSON.parse(load.conditionMode)) {
+				this.conditionMode= JSON.parse(load.conditionMode)
+				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode))
+				if (JSON.parse(load.checked)) {
+					for (var i = 0; i < this.conditionMode.Steps.length; i++) {
+						if(load.taskId === this.conditionMode.Steps[i].TaskItemID) {
+							this.index = this.conditionMode.Steps[i].Status
+							this.mark = this.conditionMode.Steps[i].Mark
+							var att = this.conditionMode.Steps[i].Attributes[0]
+							this.text = att.FieldName
+							this.imageList = att.Datas
+						}
+					}
+				}
 			}
 			if(undefined != load.taskId && "" != load.taskId) {
 				this.taskId = load.taskId

@@ -1,6 +1,6 @@
 <template>
 	<view class="page">
-		<uni-nav-bar color="#333333" background-color="#FFFFFF" right-icon="search" @click-right="search">
+		<uni-nav-bar color="#333333" background-color="#FFFFFF" right-icon="search" @click-right="conditionSearch">
 			<block slot="left">
 				<view class="city">
 					<text style="font-size: 32upx;"> </text>
@@ -27,7 +27,7 @@
 						<checkbox-group @change="checkboxChange">
 							<view class="uni-list-cell" v-for="(item,index) in localList" :key="index">
 								<checkbox class="uni-list-cell-navigate-box" :value="index"></checkbox>
-								<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover" @click="checkCondition(index,item)">
+								<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover" @click="conditionCheck(index,item)">
 									{{item.Title}}
 									<view class="uni-list-cell-navigate-date">{{item.StepDate}}</view>
 								</view>
@@ -73,7 +73,7 @@
 			}
 		},
 		methods: {
-			search() {
+			conditionSearch() {
 				uni.showToast({
 					icon: "none",
 					title: "搜索"
@@ -122,26 +122,30 @@
 				//console.log("this.submitList size "+ this.submitList.length);
 			},
 			bindSubmit: function() {
-				console.log("this.submitList => "+ JSON.stringify(this.submitList));
-				/* uni.request({
+				var list = this.submitList[0]
+				var str = JSON.stringify(list.Steps)
+				list.Steps = str
+				//console.log("list => "+ JSON.stringify(list));
+				uni.request({
 					url: service.SERVICE_URL + 'MCsp/Save',
 					method: 'POST',
 					header:{
 						'content-type':"application/x-www-form-urlencoded"
 					},
-					data: this.submitList[0],
+					data: list,
 					success(succ) {
 						console.log("succ => " + JSON.stringify(succ));
 					},
 					fail() {
 						console.log("fain");
 					}
-				}) */
+				})
 			},
-			checkCondition: function(index, con) {
+			conditionCheck: function(index, con) {
 				this.listIndex = index;
+				//console.log("con => "+ JSON.stringify(con));
 				uni.navigateTo({
-					url: './conditionAdd?condition=' + JSON.stringify(con)
+					url: './conditionAdd?conditionMode=' + JSON.stringify(con)+ "&checked=true"
 				})
 			}
 		},
@@ -192,15 +196,15 @@
 		onShow() {
 			var pages = getCurrentPages();
 			var page = pages[pages.length - 1]
-			if (undefined != page.data.mode) {
-				//console.log("data.mode => "+ page.data.mode);
-				if (page.data.checked) {
-					this.localList.splice(this.listIndex, 1, JSON.parse(page.data.mode));
+			if (undefined != page.data.conditionMode && "" != page.data.conditionMode) {
+				//console.log("data.conditionMode => "+ page.data.conditionMode);
+				if ("true" === page.data.checked) {
+					this.localList.splice(this.listIndex, 1, JSON.parse(page.data.conditionMode));
 				} else {
-					this.localList.push(JSON.parse(page.data.mode))
+					this.localList.push(JSON.parse(page.data.conditionMode))
 				}
 				//console.log("this.localList size "+ this.localList.length+ " => "+ this.localList[0].Title)
-				page.data.mode = undefined; // 设置undefined防止重复添加
+				page.data.conditionMode = undefined; // 设置undefined防止重复添加
 			}
 		}
 	}
