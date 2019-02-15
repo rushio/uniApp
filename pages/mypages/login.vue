@@ -57,22 +57,24 @@
 					});
 					return;
 				}
-				uni.request({
-					url: server.SERVICE_URL+ 'mAccount/LogOn',
-					data: {
+				var userInfo = {
 						username: this.account,
 						password: this.password
-					},
+					}
+				uni.request({
+					url: server.SERVICE_URL+ 'mAccount/LogOn',
+					data: userInfo,
 					success(object) {
 						if(object.statusCode === 200) {
 							var obj = JSON.stringify(object.data);
 							//console.log(obj)
 							if (obj != "[]") {
 								const user = {
-									account: object.data.UserName,
-									password: "",
+									account: userInfo.username,
+									password: userInfo.password,
 									UnitID: object.data.UnitID,
-									UnitName: object.data.UnitName
+									UnitName: object.data.UnitName,
+									Token: object.data.Token
 								};
 								// 本地存储用户信息
 								server.addUser(user);

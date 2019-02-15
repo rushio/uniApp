@@ -123,21 +123,32 @@
 			},
 			bindSubmit: function() {
 				var list = this.submitList[0]
-				var str = JSON.stringify(list.Steps)
-				list.Steps = str
 				//console.log("list => "+ JSON.stringify(list));
+				console.log("token => "+ service.getUsers()[0].token);
 				uni.request({
 					url: service.SERVICE_URL + 'MCsp/Save',
 					method: 'POST',
 					header:{
-						'content-type':"application/x-www-form-urlencoded"
+						'content-type':"application/x-www-form-urlencoded",
+						'UserToken': service.getUsers()[0].token
 					},
 					data: list,
 					success(succ) {
+						if ("true" === succ.data) {
+							uni.showToast({
+								icon: 'none',
+								title: '提交成功。'
+							})
+						} else {
+							uni.showToast({
+								icon: 'none',
+								title: '提交失败。'
+							})
+						}
 						console.log("succ => " + JSON.stringify(succ));
 					},
 					fail() {
-						console.log("fain");
+						console.log("fail");
 					}
 				})
 			},
@@ -198,10 +209,13 @@
 			var page = pages[pages.length - 1]
 			if (undefined != page.data.conditionMode && "" != page.data.conditionMode) {
 				//console.log("data.conditionMode => "+ page.data.conditionMode);
+				var mode = JSON.parse(page.data.conditionMode);
+				// 给Steps进行JSON.stringify()，和Save接口格式保持统一
+				mode.Steps = JSON.stringify(mode.Steps)
 				if ("true" === page.data.checked) {
-					this.localList.splice(this.listIndex, 1, JSON.parse(page.data.conditionMode));
+					this.localList.splice(this.listIndex, 1, mode);
 				} else {
-					this.localList.push(JSON.parse(page.data.conditionMode))
+					this.localList.push(mode)
 				}
 				//console.log("this.localList size "+ this.localList.length+ " => "+ this.localList[0].Title)
 				page.data.conditionMode = undefined; // 设置undefined防止重复添加

@@ -9,7 +9,9 @@
 	export default {
 		data() {
 			return {
-				userInfo: [{account: '您未登录'}]
+				userInfo: [{
+					account: '您未登录'
+				}]
 			}
 		},
 		onLoad() {
@@ -20,7 +22,8 @@
 				})
 			} else {
 				this.userInfo = server.getUsers();
-				console.log("get login =>" + JSON.stringify(server.getUsers()))
+				var log = "{\"account\":\"" + this.userInfo[0].account + "\",\"token\":\"" + this.userInfo[0].token + "\"}"
+				console.log("get login => " + log)
 				uni.switchTab({
 					url: './application'
 				})
