@@ -19,7 +19,10 @@
 							<view class="uni-list uni-collapse" :class="list.IsSite ? 'uni-active' : ''">
 								<view class="uni-list-cell" hover-class="uni-list-cell-hover" v-for="(item,key) in list.items" :key="key"
 								 :class="key === list.items.length - 1 ? 'uni-list-cell-last' : ''" @click="toConditionCreate(item.id, list.Data.Attributes, item.checked)">
-									<view class="uni-list-cell-navigate" :class="item.checked? 'item-checked':''"> {{item.name}} </view>
+									<view class="uni-list-cell-navigate"> {{item.name}} </view>
+									<view v-show="item.checked?true:false">
+										<uni-icon size="30" :type="'checkbox-filled'" :color="'#007aff'"></uni-icon>
+									</view>
 								</view>
 							</view>
 						</view>
@@ -36,6 +39,7 @@
 
 <script>
 	import service from '../../common/service.js'
+	import uniIcon from '../../components/search-date/uni-icon.vue'
 
 	export default {
 		data() {
@@ -90,18 +94,9 @@
 					Mark: '',
 					Attributes: []
 				}
-				var count = 0;
-				for (var i = 0; i < this.conditionMode.Steps.length; i++) {
-					if (id === this.conditionMode.Steps[i].TaskItemID) {
-						count = count + 1;
-					}
-				}
-				if (count <= 0) {
-					this.conditionMode.Steps.push(step)
-				}
 				uni.navigateTo({
 					url: './conditionCreate?att=' + attributes + "&conditionMode=" + JSON.stringify(this.conditionMode) +
-					"&checked=" + checked + "&taskId=" + id
+					"&checked=" + checked + "&taskId=" + id+ "&step="+ JSON.stringify(step)
 				})
 			},
 			trigerCollapse(sub, e) {
@@ -133,6 +128,9 @@
 					delta: 2
 				})
 			}
+		},
+		components: {
+			uniIcon
 		},
 		onShow() {
 			var pages = getCurrentPages();

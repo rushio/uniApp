@@ -68,11 +68,11 @@
 				}
 				// 生成工况的mode json用于提交
 				var mode = {
-					UnitID: service.getUsers()[0].unitid, // 创建人单位信息
-					UnitName: service.getUsers()[0].unitname, // 创建人单位信息
+					UnitID: service.getUsers().unitid, // 创建人单位信息
+					UnitName: service.getUsers().unitname, // 创建人单位信息
 					StepDate: this.todayDate, //日期
 					Status: this.radioValue, // 施工状态 => 返回数字
-					CreatorName: service.getUsers()[0].account, // 上传人
+					CreatorName: service.getUsers().account, // 上传人
 					UploadDate: '', // 上传日期
 					CurrentSiteID: this.siteId, // 工点ID
 					Mark: this.Mark, // 补充说明
@@ -134,7 +134,7 @@
 		onLoad(load) {
 			this.todayDate = now.date;
 			this.endDate = now.date;
-			this.username = service.getUsers()[0].account;
+			this.username = service.getUsers().account;
 			this.startDate = service.getLastUploadDate();
 			if (undefined != load.conditionMode && "" != load.conditionMode) {
 				// 初始化工况要检查的数据

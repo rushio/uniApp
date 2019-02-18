@@ -1,10 +1,10 @@
 <template>
 	<view class="">
-		<userCenten :user="userInfo"></userCenten>
+		<userCenten :user="userInfo" @bindSignOut="bindSignOut"></userCenten>
 	</view>
 </template>
 <script>
-	import server from "../../common/service.js"
+	import service from "../../common/service.js"
 	import userCenten from '../../components/user-center/user-center.vue'
 	export default {
 		data() {
@@ -14,15 +14,35 @@
 				}]
 			}
 		},
+		methods: {
+			bindSignOut() {
+				uni.showActionSheet({
+					itemList: ['退出登录'],
+					success: function(succ) {
+						switch (succ.tapIndex) {
+							case 0:
+								service.removeUser()
+								uni.reLaunch({
+									url: "./login"
+								})
+								break;
+						}
+					}/* ,
+					fail: function(res) {
+						console.log(res.errMsg);
+					} */
+				})
+			}
+		},
 		onLoad() {
-			if ("[]" === JSON.stringify(server.getUsers())) {
+			if ("[]" === JSON.stringify(service.getUsers())) {
 				console.log("set login")
 				uni.reLaunch({
 					url: "./login"
 				})
 			} else {
-				this.userInfo = server.getUsers();
-				var log = "{\"account\":\"" + this.userInfo[0].account + "\",\"token\":\"" + this.userInfo[0].token + "\"}"
+				this.userInfo = service.getUsers();
+				var log = "{\"account\":\"" + this.userInfo.account + "\",\"token\":\"" + this.userInfo.Token + "\"}"
 				console.log("get login => " + log)
 				uni.switchTab({
 					url: './application'

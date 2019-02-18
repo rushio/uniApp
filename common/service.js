@@ -2,8 +2,8 @@
 const USERS_KEY = 'USERS_KEY';
 const STATE_KEY = 'STATE_KEY';
 // 服务器地址
-//const SERVICE_URL = 'http://192.168.90.202:8080/';
-const SERVICE_URL = 'http://192.168.191.1:8080/';
+const SERVICE_URL = 'http://192.168.90.202:8081/';
+// const SERVICE_URL = 'http://192.168.191.1:8080/'; // 本机ip
 
 // 获取用户信息
 const getUsers = function () {
@@ -16,14 +16,20 @@ const getUsers = function () {
 }
 // 保存用户信息
 const addUser = function (userInfo) {
-    let users = getUsers();
+    /* let users = getUsers();
     users.push({
         account: userInfo.account,
         password: userInfo.password,
 		unitid: userInfo.UnitID,
-		unitname: userInfo.UnitName
-    });
-    uni.setStorageSync(USERS_KEY, JSON.stringify(users));
+		unitname: userInfo.UnitName,
+		token: userInfo.Token
+    }); */
+    uni.setStorageSync(USERS_KEY, JSON.stringify(userInfo));
+}
+// 清除用户信息
+const removeUser = function() {
+	uni.removeStorageSync(USERS_KEY)
+	uni.clearStorageSync();
 }
 
 // 获取“工点”信息
@@ -71,14 +77,32 @@ const setLastUploadDate = function(date) {
 	uni.setStorageSync(LASTUPLOADDATE, JSON.stringify(date));
 }
 
+// 获取所有没有提交工况检查记录
+const ALLCONDITION = 'ALLCONDITION';
+const getAllCondition = function(){
+	let ret = '';
+	ret = uni.getStorageSync(ALLCONDITION);
+	if (!ret) {
+		ret = '[]';
+	}
+	return JSON.parse(ret)
+}
+// 保存所有没有提交工况检查记录
+const setAllCondition = function(all) {
+	uni.setStorageSync(ALLCONDITION, JSON.stringify(all))
+}
+
 export default {
 	SERVICE_URL,
     addUser,
     getUsers,
+	removeUser,
 	setPoints,
 	getPoints,
 	setUnitEngineeringLists,
 	getUnitEngineeringLists,
 	setLastUploadDate,
-	getLastUploadDate
+	getLastUploadDate,
+	setAllCondition,
+	getAllCondition
 }

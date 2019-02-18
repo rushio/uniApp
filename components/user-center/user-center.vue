@@ -3,12 +3,12 @@
 		<view class="logo" @click="goLogin" :hover-class="!login ? 'logo-hover' : ''">
 			<image class="logo-img" :src="avatarUrl"></image>
 			<view class="logo-title">
-				<text class="uer-name">Hi，{{user[0].account}}</text>
+				<text class="uer-name">Hi，{{user.account}}</text>
 				<text class="go-login navigat-arrow" v-if="!login">&#xe65e;</text>
 			</view>
 		</view>
 		<view class="center-list">
-			<view class="center-list-item border-bottom">
+			<view class="center-list-item border-bottom" @click="bindClick">
 				<text class="list-icon">&#xe60f;</text>
 				<text class="list-text">帐号管理</text>
 				<text class="navigat-arrow">&#xe65e;</text>
@@ -47,8 +47,10 @@
 			/* 用户信息 */
 			user: {
 				type: Array,
-				default: function(){
-					[{account: '您未登录'}]
+				default: function() {
+					[{
+						account: '您未登录'
+					}]
 				}
 			}
 		},
@@ -59,7 +61,10 @@
 		},
 		methods: {
 			goLogin() {
-				console.log("user"+ JSON.stringify(this.user))
+				console.log("user => " + JSON.stringify(this.user))
+			},
+			bindClick() {
+				this.$emit('bindSignOut')
 			}
 		}
 	}

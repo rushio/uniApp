@@ -1,17 +1,15 @@
 <template>
 	<view class="page">
-		<uni-nav-bar color="#333333" background-color="#FFFFFF" right-icon="search" @click-right="conditionSearch">
+		<!-- <uni-nav-bar color="#333333" background-color="#FFFFFF" right-icon="search" @click-right="conditionSearch">
 			<block slot="left">
 				<view class="city">
 					<text style="font-size: 32upx;"> </text>
-					<!-- <uni-icon type="arrowdown" color="#333333" size="22"></uni-icon> -->
 				</view>
 			</block>
 			<view class="input-view">
-				<!-- <uni-icon type="search" size="22" color="#666666"></uni-icon> -->
 				<input confirm-type="search" @confirm="confirm" class="input" type="text" placeholder="请输入搜索..." />
 			</view>
-		</uni-nav-bar>
+		</uni-nav-bar> -->
 		<view class="uni-padding-wrap uni-common-mt">
 			<view class="segmented-control" :class="styleType" style="border-color: #007aff">
 				<view v-for="(item, index) in titleList" class="segmented-control-item" :key="index" :class="styleType" :style="index === current ? activeStyle : itemStyle"
@@ -22,22 +20,19 @@
 		</view>
 		<view class="content">
 			<view v-show="current === 0">
-				<view v-if="localList.length">
-					<view class="uni-list">
-						<checkbox-group @change="checkboxChange">
-							<view class="uni-list-cell" v-for="(item,index) in localList" :key="index">
-								<checkbox class="uni-list-cell-navigate-box" :value="index"></checkbox>
-								<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover" @click="conditionCheck(index,item)">
-									{{item.Title}}
-									<view class="uni-list-cell-navigate-date">{{item.StepDate}}</view>
-								</view>
+				<view class="uni-list">
+					<checkbox-group @change="checkboxChange">
+						<view class="uni-list-cell" v-for="(item,index) in localList" :key="index">
+							<checkbox class="uni-list-cell-navigate-box" :value="index"></checkbox>
+							<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover" @click="conditionCheck(index,item)">
+								{{item.Title}}
+								<view class="uni-list-cell-navigate-date">{{item.StepDate}}</view>
 							</view>
-						</checkbox-group>
-					</view>
-					<button style="margin: 10upx;" type="primary" :disabled="submitList.length>0?false:true" @click="bindSubmit()">提交</button>
+						</view>
+					</checkbox-group>
 				</view>
-				<view style="text-align: center;" v-else>
-					<image class="img-empty" src="../../static/img/network_error.png"></image>
+				<view v-show="localList.length">
+					<button style="margin: 10upx;" type="primary" :disabled="submitList.length>0?false:true" @click="bindSubmit()">提交</button>
 				</view>
 			</view>
 			<view v-show="current === 1">
@@ -123,18 +118,42 @@
 			},
 			bindSubmit: function() {
 				var list = this.submitList[0]
-				//console.log("list => "+ JSON.stringify(list));
-				console.log("token => "+ service.getUsers()[0].token);
+				//console.log("list => " + JSON.stringify(list));
+				var img = JSON.parse(list.Steps)
+				// const uploadTask = 	
+				uni.uploadFile({
+					url: service.SERVICE_URL + 'MCsp/upload',
+					filePath: img[0].Attributes[0].Datas,
+					name: 'file',
+					formData: {
+						'user': 'test'
+					},
+					success: (succ) => {
+						console.log(succ.data);
+					},
+					fail() {
+						console.log("fail => img upload");
+					}
+				});
+				/* uploadTask.onProgressUpdate((res) => {
+					console.log('上传进度' + res.progress);
+					console.log('已经上传的数据长度' + res.totalBytesSent);
+					console.log('预期需要上传的数据总长度' + res.totalBytesExpectedToSend);
+					// 测试条件，取消上传任务。
+					if (res.progress > 50) {
+						uploadTask.abort();
+					}
+				}); */
 				uni.request({
 					url: service.SERVICE_URL + 'MCsp/Save',
 					method: 'POST',
-					header:{
-						'content-type':"application/x-www-form-urlencoded",
-						'UserToken': service.getUsers()[0].token
+					header: {
+						'content-type': "application/x-www-form-urlencoded",
+						'UserToken': service.getUsers().Token
 					},
 					data: list,
 					success(succ) {
-						if ("true" === succ.data) {
+						if (succ.data) {
 							uni.showToast({
 								icon: 'none',
 								title: '提交成功。'
@@ -148,7 +167,7 @@
 						console.log("succ => " + JSON.stringify(succ));
 					},
 					fail() {
-						console.log("fail");
+						console.log("fail => MCsp/Save");
 					}
 				})
 			},
@@ -156,7 +175,7 @@
 				this.listIndex = index;
 				//console.log("con => "+ JSON.stringify(con));
 				uni.navigateTo({
-					url: './conditionAdd?conditionMode=' + JSON.stringify(con)+ "&checked=true"
+					url: './conditionAdd?conditionMode=' + JSON.stringify(con) + "&checked=true"
 				})
 			}
 		},
@@ -202,6 +221,10 @@
 			uniIcon
 		},
 		onLoad() {
+			if (undefined != service.getAllCondition() && "" != service.getAllCondition()) {
+				this.localList = service.getAllCondition()
+				//console.log("localList => "+ JSON.stringify(service.getAllCondition()));
+			}
 			this.getUnitEngineerings()
 		},
 		onShow() {
@@ -219,6 +242,11 @@
 				}
 				//console.log("this.localList size "+ this.localList.length+ " => "+ this.localList[0].Title)
 				page.data.conditionMode = undefined; // 设置undefined防止重复添加
+			}
+		},
+		onUnload() {
+			if (this.localList.length >= 1) {
+				service.setAllCondition(this.localList)
 			}
 		}
 	}
