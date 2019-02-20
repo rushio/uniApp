@@ -18,7 +18,7 @@
 							</view>
 							<view class="uni-list uni-collapse" :class="list.IsSite ? 'uni-active' : ''">
 								<view class="uni-list-cell" hover-class="uni-list-cell-hover" v-for="(item,key) in list.items" :key="key"
-								 :class="key === list.items.length - 1 ? 'uni-list-cell-last' : ''" @click="toConditionCreate(item.id, list.Data.Attributes, item.checked)">
+								 :class="key === list.items.length - 1 ? 'uni-list-cell-last' : ''" @click="toConditionCreate(item, list.Data.Attributes)">
 									<view class="uni-list-cell-navigate"> {{item.name}} </view>
 									<view v-show="item.checked?true:false">
 										<uni-icon size="30" :type="'checkbox-filled'" :color="'#007aff'"></uni-icon>
@@ -82,13 +82,13 @@
 			 * id：表示工序的id
 			 * attributes：表示工序的att
 			 */
-			toConditionCreate(id, attributes, checked) {
+			toConditionCreate(item, attributes) {
 				var step = { //JSON.stringify()
 					AreaID: this.partitionValue, // 分区 => Value
 					SubItemID: this.subID, //分部分项id
 					SubName: this.subName, //分部分项名称
-					TaskItemID: id, // 工程类型 -> 分部分项 -> 工序item:id
-					Name: '', // 
+					TaskItemID: item.id, // 工程类型 -> 分部分项 -> 工序item:id
+					Name: item.name, // 工序名称
 					CspTaskItemID: '', //
 					Status: '', // 表示施工状态共4种 => 数字
 					Mark: '',
@@ -96,7 +96,7 @@
 				}
 				uni.navigateTo({
 					url: './conditionCreate?att=' + attributes + "&conditionMode=" + JSON.stringify(this.conditionMode) +
-					"&checked=" + checked + "&taskId=" + id+ "&step="+ JSON.stringify(step)
+					"&checked=" + item.checked + "&taskId=" + item.id+ "&step="+ JSON.stringify(step)
 				})
 			},
 			trigerCollapse(sub, e) {

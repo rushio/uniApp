@@ -78,6 +78,17 @@
 				if (this.current !== index) {
 					this.current = index;
 				}
+				if (1 === index) {
+					uni.request({
+						url: service.SERVICE_URL + 'MCsp/GetConstructionStepList',
+						success(succ) {
+							console.log("succ => "+ JSON.stringify(succ));
+						},
+						fail() {
+							console.log("fail => 获取本用户上传的施工工况列表");
+						}
+					})
+				}
 			},
 			getUnitEngineerings() {
 				// 获取所有单位工程
@@ -121,7 +132,17 @@
 				//console.log("list => " + JSON.stringify(list));
 				if (0 < list.Steps.length) {
 					for (var step = 0; step < list.Steps.length; step++) {
-						var imgs = list.Steps[step].Attributes[0].Datas;
+						var attArr = list.Steps[step].Attributes;
+						var imgs = [];
+						if(0 < attArr.length) {
+							for (var i = 0; i < attArr.length; i++) {
+								// 从Attributes中获取图片集合
+								if ("Upload" === attArr[i].DataType) {
+									imgs = JSON.parse(attArr[i].Value);
+									break;
+								}
+							}
+						}
 						//console.log("imgs size " + imgs.length + " => " + JSON.stringify(imgs));
 						if (0 < imgs.length) {
 							var i = step
@@ -131,8 +152,15 @@
 								valueArr = service.getImgDataArr();
 								//console.log("valueArr => " + JSON.stringify(valueArr));
 								service.removeImgArr();
-								// 将组装好的图片信息JSON.stringify()后存放在Attributes下的Value中
-								list.Steps[i].Attributes[0].Value = JSON.stringify(valueArr)
+								// 将组装好的图片信息JSON.stringify()后存放在Attributes中Upload下的Value中
+								if(0 < attArr.length) {
+									for (var i = 0; i < attArr.length; i++) {
+										if ("Upload" === attArr[i].DataType) {
+											attArr[i].Value = JSON.stringify(valueArr);
+											break;
+										}
+									}
+								}
 								//console.log("list => "+ JSON.stringify(list));
 							}, 500)
 						}
@@ -152,12 +180,6 @@
 								success(succ) {
 									console.log("succ MCsp/Save => " + JSON.stringify(succ));
 									if (succ.data) {
-										_this.localList.splice(_this.localList.indexOf(list),1);
-										_this.submitList.splice(0, 1);
-										var items = _this.localList;
-										for (var i = 0, lenI = items.length; i < lenI; ++i) {
-											items[i].checked = false;
-										}
 										uni.showToast({
 											icon: 'none',
 											title: '提交成功。'
@@ -168,8 +190,20 @@
 											title: '提交失败。'
 										})
 									}
+									_this.localList.splice(_this.localList.indexOf(list),1);
+									_this.submitList.splice(0, 1);
+									var items = _this.localList;
+									for (var i = 0, lenI = items.length; i < lenI; ++i) {
+										items[i].checked = false;
+									}
 								},
 								fail() {
+									_this.localList.splice(_this.localList.indexOf(list),1);
+									_this.submitList.splice(0, 1);
+									var items = _this.localList;
+									for (var i = 0, lenI = items.length; i < lenI; ++i) {
+										items[i].checked = false;
+									}
 									console.log("fail => MCsp/Save");
 								}
 							})
@@ -307,7 +341,7 @@
 			var pages = getCurrentPages();
 			var page = pages[pages.length - 1]
 			if (undefined != page.data.conditionMode && "" != page.data.conditionMode) {
-				//console.log("data.conditionMode => "+ page.data.conditionMode);
+				console.log("data.conditionMode => "+ page.data.conditionMode);
 				var mode = JSON.parse(page.data.conditionMode);
 				// 给Steps进行JSON.stringify()，和Save接口格式保持统一
 				// mode.Steps = JSON.stringify(mode.Steps)

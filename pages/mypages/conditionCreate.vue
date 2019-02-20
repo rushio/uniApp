@@ -9,26 +9,32 @@
 				</picker>
 			</view>
 			<block v-for="(list,index) in attributesList" :key="index">
-				<view v-if="'Text' === list.DataType">
+				<view v-show="'Text' === list.DataType">
 					<view class="uni-input-row-item">
 						<label>{{list.DisplayName}}：</label>
 						<textarea class="uni-input-textarea" v-model="text" :value="text" placeholder="请说明..."></textarea>
 					</view>
 				</view>
-			</block>
-			<view class="uni-input-row-item">
-				<label style="padding-top: 15upx;">现场影像：</label>
-				<view class="uni-uploader__files">
-					<block v-for="(image,index) in imageList" :key="index">
-						<view class="uni-uploader__file">
-							<image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage"></image>
+				<view v-show="'Upload' === list.DataType" class="uni-input-row-item">
+					<label style="padding-top: 15upx;">现场影像：</label>
+					<view class="uni-uploader__files">
+						<block v-for="(image,imgKey) in imageList" :key="imgKey">
+							<view class="uni-uploader__file">
+								<image class="uni-uploader__img" :src="image" :data-src="image" @tap="previewImage"></image>
+							</view>
+						</block>
+						<view class="uni-uploader__input-box">
+							<view class="uni-uploader__input" @tap="bindPicture"></view>
 						</view>
-					</block>
-					<view class="uni-uploader__input-box">
-						<view class="uni-uploader__input" @tap="bindPicture"></view>
 					</view>
 				</view>
-			</view>
+				<view v-show="'Dropdownlist' === list.DataType" class="uni-input-row-item">
+					下拉列表
+				</view>
+				<view v-show="'MultiSelect' === list.DataType" class="uni-input-row-item">
+					多选
+				</view>
+			</block>
 			<view class="uni-input-row-item">
 				<label>备注：</label>
 				<textarea class="uni-input-textarea" v-model="mark" :value="mark" placeholder="请说明..."></textarea>
@@ -44,7 +50,7 @@
 			return {
 				attributesList: [],
 				index: 0,
-				workState: ['施工中', '停工', '未开工', '已竣工'],
+				workState: ['施工中', '停工', '已竣工', '未开工'],
 				imageList: [],
 				mark: '',
 				text: '',
@@ -68,7 +74,7 @@
 								this.imageList = [];
 								uni.chooseImage({
 									count: 5 - this.imageList.length,
-									success:(res) => {
+									success: (res) => {
 										//console.log("imgPaths => "+ JSON.stringify(res.tempFilePaths))
 										this.imageList = this.imageList.concat(res.tempFilePaths);
 									}
@@ -79,7 +85,7 @@
 				} else {
 					uni.chooseImage({
 						count: 5 - this.imageList.length,
-						success:(res) => {
+						success: (res) => {
 							//console.log("imgPaths => "+ JSON.stringify(res.tempFilePaths))
 							this.imageList = this.imageList.concat(res.tempFilePaths);
 						}
@@ -94,15 +100,34 @@
 				})
 			},
 			conditionCreate() {
-				var att = {
-					FieldName: this.text, // 文本
-					Value: '[]', // JSON.stringify() [{FileOldName:"",FileNewName:"",Url:"",FileSize:"",FileType:""}]
-					Datas: this.imageList // 照片
+				var attArr = []
+				if (0 < this.attributesList.length) {
+					for (var i = 0; i < this.attributesList.length; i++) {
+						var att = {
+							FieldName: '', // 文本
+							Value: '[]', // JSON.stringify() [{FileOldName:"",FileNewName:"",Url:"",FileSize:"",FileType:""}]
+							DataType: ''
+						}
+						var attributes = this.attributesList[i];
+						//console.log("attributes => " + JSON.stringify(attributes));
+						att.FieldName = attributes.FieldName;
+						att.DataType = attributes.DataType
+						if ("Text" === attributes.DataType) {
+							att.Value = this.text
+							attArr.push(att)
+						}
+						if ("Upload" === attributes.DataType) {
+							att.Value = JSON.stringify(this.imageList); // 照片集合
+							attArr.push(att)
+						}
+						if ("Dropdownlist" === attributes.DataType) {}
+						if ("MultiSelect" === attributes.DataType) {}
+					}
 				}
-				this.step.Status = this.index; // 施工状态
+				this.step.Status = parseInt(this.index) + 1; // 施工状态
 				this.step.Mark = this.mark // 备注
 				this.step.Attributes = []
-				this.step.Attributes.push(att)
+				this.step.Attributes = attArr;
 				if (this.conditionMode.Steps.length <= 0) {
 					this.conditionMode.Steps.push(this.step)
 				} else {
@@ -111,7 +136,7 @@
 						if (this.taskId === this.conditionMode.Steps[i].TaskItemID) {
 							count = count + 1;
 							this.conditionMode.Steps[i].Attributes = []
-							this.conditionMode.Steps[i].Attributes.push(att)
+							this.conditionMode.Steps[i].Attributes = attArr;
 						}
 					}
 					if (count <= 0) {
@@ -130,30 +155,40 @@
 			}
 		},
 		onLoad(load) {
-			if(undefined != load.att && "" != JSON.parse(load.att)) {
+			if (undefined != load.att && "" != JSON.parse(load.att)) {
 				this.attributesList = JSON.parse(load.att);
 				//console.log("this.attributesList => " + JSON.stringify(this.attributesList))
 			}
-			if(undefined != load.conditionMode && "" != JSON.parse(load.conditionMode)) {
-				this.conditionMode= JSON.parse(load.conditionMode)
+			if (undefined != load.conditionMode && "" != JSON.parse(load.conditionMode)) {
+				this.conditionMode = JSON.parse(load.conditionMode)
 				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode))
 				if (JSON.parse(load.checked)) {
 					for (var i = 0; i < this.conditionMode.Steps.length; i++) {
-						if(load.taskId === this.conditionMode.Steps[i].TaskItemID) {
-							this.index = this.conditionMode.Steps[i].Status
+						if (load.taskId === this.conditionMode.Steps[i].TaskItemID) {
+							this.index = parseInt(this.conditionMode.Steps[i].Status) - 1
 							this.mark = this.conditionMode.Steps[i].Mark
-							var att = this.conditionMode.Steps[i].Attributes[0]
-							this.text = att.FieldName
-							this.imageList = att.Datas
+							var attArr = this.conditionMode.Steps[i].Attributes;
+							if(0 < attArr.length) {
+								for (var i = 0; i < attArr.length; i++) {
+									if ("Text" === attArr[i].DataType) {
+										this.text = attArr[i].Value
+									}
+									if ("Upload" === attArr[i].DataType) {
+										this.imageList = JSON.parse(attArr[i].Value)
+									}
+									if ("Dropdownlist" === attArr[i].DataType) {}
+									if ("MultiSelect" === attArr[i].DataType) {}
+								}
+							}
 						}
 					}
 				}
 			}
-			if(undefined != load.taskId && "" != load.taskId) {
+			if (undefined != load.taskId && "" != load.taskId) {
 				this.taskId = load.taskId
 				//console.log("this.taskId => "+ this.taskId)
 			}
-			if(undefined != load.step && "" != load.step) {
+			if (undefined != load.step && "" != load.step) {
 				this.step = JSON.parse(load.step)
 				// console.log("this.step => "+ load.step);
 			}
@@ -162,7 +197,6 @@
 </script>
 
 <style>
-
 	.uni-input-row-item {
 		position: relative;
 		display: flex;
