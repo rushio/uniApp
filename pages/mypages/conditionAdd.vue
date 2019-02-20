@@ -140,7 +140,7 @@
 				// 初始化工况要检查的数据
 				this.conditionMode = JSON.parse(load.conditionMode);
 				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode));
-				this.conditionMode.Steps = JSON.parse(this.conditionMode.Steps)
+				// this.conditionMode.Steps = JSON.parse(this.conditionMode.Steps)
 				this.conditionName = this.conditionMode.Title;
 				this.radioValue = this.conditionMode.Status;
 				this.todayDate = this.conditionMode.StepDate;

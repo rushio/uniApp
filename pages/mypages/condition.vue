@@ -119,60 +119,136 @@
 			bindSubmit: function() {
 				var list = this.submitList[0]
 				//console.log("list => " + JSON.stringify(list));
-				var img = JSON.parse(list.Steps)
-				// const uploadTask = 	
-				uni.uploadFile({
-					url: service.SERVICE_URL + 'MCsp/upload',
-					filePath: img[0].Attributes[0].Datas,
-					name: 'file',
-					formData: {
-						'user': 'test'
-					},
-					success: (succ) => {
-						console.log(succ.data);
-					},
-					fail() {
-						console.log("fail => img upload");
-					}
-				});
-				/* uploadTask.onProgressUpdate((res) => {
-					console.log('上传进度' + res.progress);
-					console.log('已经上传的数据长度' + res.totalBytesSent);
-					console.log('预期需要上传的数据总长度' + res.totalBytesExpectedToSend);
-					// 测试条件，取消上传任务。
-					if (res.progress > 50) {
-						uploadTask.abort();
-					}
-				}); */
-				uni.request({
-					url: service.SERVICE_URL + 'MCsp/Save',
-					method: 'POST',
-					header: {
-						'content-type': "application/x-www-form-urlencoded",
-						'UserToken': service.getUsers().Token
-					},
-					data: list,
-					success(succ) {
-						if (succ.data) {
-							uni.showToast({
-								icon: 'none',
-								title: '提交成功。'
-							})
-						} else {
-							uni.showToast({
-								icon: 'none',
-								title: '提交失败。'
-							})
+				if (0 < list.Steps.length) {
+					for (var step = 0; step < list.Steps.length; step++) {
+						var imgs = list.Steps[step].Attributes[0].Datas;
+						//console.log("imgs size " + imgs.length + " => " + JSON.stringify(imgs));
+						if (0 < imgs.length) {
+							var i = step
+							var valueArr = []; // 定义一个图片上传后保存数据的集合
+							this.uploadImage(imgs);
+							setTimeout(function() {
+								valueArr = service.getImgDataArr();
+								//console.log("valueArr => " + JSON.stringify(valueArr));
+								service.removeImgArr();
+								// 将组装好的图片信息JSON.stringify()后存放在Attributes下的Value中
+								list.Steps[i].Attributes[0].Value = JSON.stringify(valueArr)
+								//console.log("list => "+ JSON.stringify(list));
+							}, 500)
 						}
-						console.log("succ => " + JSON.stringify(succ));
-					},
-					fail() {
-						console.log("fail => MCsp/Save");
+						const _this = this;
+						setTimeout(function() {
+							// 给Steps进行JSON.stringify()，和Save接口格式保持统一
+							list.Steps = JSON.stringify(list.Steps);
+							//console.log("list => "+ JSON.stringify(list));
+							uni.request({
+								url: service.SERVICE_URL + 'MCsp/Save',
+								method: 'POST',
+								header: {
+									'content-type': "application/x-www-form-urlencoded",
+									'UserToken': service.getUsers().Token
+								},
+								data: list,
+								success(succ) {
+									console.log("succ MCsp/Save => " + JSON.stringify(succ));
+									if (succ.data) {
+										_this.localList.splice(_this.localList.indexOf(list),1);
+										_this.submitList.splice(0, 1);
+										var items = _this.localList;
+										for (var i = 0, lenI = items.length; i < lenI; ++i) {
+											items[i].checked = false;
+										}
+										uni.showToast({
+											icon: 'none',
+											title: '提交成功。'
+										})
+									} else {
+										uni.showToast({
+											icon: 'none',
+											title: '提交失败。'
+										})
+									}
+								},
+								fail() {
+									console.log("fail => MCsp/Save");
+								}
+							})
+						}, 800)
 					}
-				})
+				}
+			},
+			uploadImage: function(imgs) {
+				for (var i = 0; i < imgs.length; i++) {
+					//console.log("imgs[i] => " + imgs[i]);
+					var urlArr = imgs[i].split('/');
+					var lastUrl = urlArr[urlArr.length - 1]
+					var imgName = lastUrl.split('.')[0];
+					var value = {
+						FileOldName: '',
+						FileNewName: '',
+						Url: '',
+						FileSize: '',
+						FileType: '',
+					}
+					// 先上传附件（图片）
+					// const uploadTask = 
+					uni.uploadFile({
+						url: service.SERVICE_URL + 'MCsp/upload',
+						filePath: imgs[i],
+						name: 'file',
+						success: (succ) => {
+							var succData = JSON.parse(succ.data)
+							console.log("succData => " + JSON.stringify(succData));
+							if ("" != succData && succData.success) {
+								value.FileOldName = imgName;
+								value.FileNewName = succData.fileName;
+								value.Url = succData.url;
+								value.FileSize = succData.size
+								var urlArr = succData.url.split('.')
+								value.FileType = urlArr[urlArr.length - 1]
+								//console.log("value => " + JSON.stringify(value));
+								service.setImgDataArr(value)
+							} else {
+								uni.showToast({
+									icon: 'none',
+									title: '附件上传失败',
+									mask: false,
+									duration: 1500
+								});
+							}
+						},
+						fail() {
+							console.log("fail => img upload");
+							uni.showToast({
+								icon: 'none',
+								title: '请检查网络或服务.',
+								mask: false,
+								duration: 1500
+							});
+						}
+					});
+					/* uploadTask.onProgressUpdate((res) => {
+						console.log('上传进度' + res.progress);
+						console.log('已经上传的数据长度' + res.totalBytesSent);
+						console.log('预期需要上传的数据总长度' + res.totalBytesExpectedToSend);
+						// 测试条件，取消上传任务。
+						if (res.progress > 50) {
+							uploadTask.abort();
+						}
+					}); */
+				}
 			},
 			conditionCheck: function(index, con) {
 				this.listIndex = index;
+				if (0 < this.submitList.length) {
+					uni.showToast({
+						icon: 'none',
+						title: '请撤销提交状态.',
+						mask: false,
+						duration: 1500
+					});
+					return;
+				}
 				//console.log("con => "+ JSON.stringify(con));
 				uni.navigateTo({
 					url: './conditionAdd?conditionMode=' + JSON.stringify(con) + "&checked=true"
@@ -234,7 +310,7 @@
 				//console.log("data.conditionMode => "+ page.data.conditionMode);
 				var mode = JSON.parse(page.data.conditionMode);
 				// 给Steps进行JSON.stringify()，和Save接口格式保持统一
-				mode.Steps = JSON.stringify(mode.Steps)
+				// mode.Steps = JSON.stringify(mode.Steps)
 				if ("true" === page.data.checked) {
 					this.localList.splice(this.listIndex, 1, mode);
 				} else {
@@ -245,7 +321,7 @@
 			}
 		},
 		onUnload() {
-			if (this.localList.length >= 1) {
+			if (0 < this.localList.length) {
 				service.setAllCondition(this.localList)
 			}
 		}

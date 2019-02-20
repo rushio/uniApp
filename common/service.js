@@ -2,21 +2,21 @@
 const USERS_KEY = 'USERS_KEY';
 const STATE_KEY = 'STATE_KEY';
 // 服务器地址
-const SERVICE_URL = 'http://192.168.90.202:8081/';
-// const SERVICE_URL = 'http://192.168.191.1:8080/'; // 本机ip
+// const SERVICE_URL = 'http://192.168.90.202:8081/';
+const SERVICE_URL = 'http://192.168.191.1:8080/'; // 本机ip
 
 // 获取用户信息
-const getUsers = function () {
-    let ret = '';
-    ret = uni.getStorageSync(USERS_KEY);
-    if (!ret) {
-        ret = '[]';
-    }
-    return JSON.parse(ret);
+const getUsers = function() {
+	let ret = '';
+	ret = uni.getStorageSync(USERS_KEY);
+	if (!ret) {
+		ret = '[]';
+	}
+	return JSON.parse(ret);
 }
 // 保存用户信息
-const addUser = function (userInfo) {
-    /* let users = getUsers();
+const addUser = function(userInfo) {
+	/* let users = getUsers();
     users.push({
         account: userInfo.account,
         password: userInfo.password,
@@ -24,7 +24,7 @@ const addUser = function (userInfo) {
 		unitname: userInfo.UnitName,
 		token: userInfo.Token
     }); */
-    uni.setStorageSync(USERS_KEY, JSON.stringify(userInfo));
+	uni.setStorageSync(USERS_KEY, JSON.stringify(userInfo));
 }
 // 清除用户信息
 const removeUser = function() {
@@ -34,17 +34,17 @@ const removeUser = function() {
 
 // 获取“工点”信息
 const PONINTS_KEY = 'PONINTS_KEY';
-const getPoints = function(){
+const getPoints = function() {
 	let ret = '';
 	ret = uni.getStorageSync(PONINTS_KEY);
 	if (!ret) {
-	    ret = '[]';
+		ret = '[]';
 	}
 	return JSON.parse(ret);
 }
 // 保存“工点”信息
-const setPoints = function (points) {
-    uni.setStorageSync(PONINTS_KEY, JSON.stringify(points));
+const setPoints = function(points) {
+	uni.setStorageSync(PONINTS_KEY, JSON.stringify(points));
 }
 
 // 获取单位工程
@@ -79,7 +79,7 @@ const setLastUploadDate = function(date) {
 
 // 获取所有没有提交工况检查记录
 const ALLCONDITION = 'ALLCONDITION';
-const getAllCondition = function(){
+const getAllCondition = function() {
 	let ret = '';
 	ret = uni.getStorageSync(ALLCONDITION);
 	if (!ret) {
@@ -92,10 +92,37 @@ const setAllCondition = function(all) {
 	uni.setStorageSync(ALLCONDITION, JSON.stringify(all))
 }
 
+// 获取上传图片后返回数据集合
+const IMGDATAARR = 'IMGDATAARR';
+const getImgDataArr = function() {
+	let ret = '';
+	ret = uni.getStorageSync(IMGDATAARR);
+	if (!ret) {
+		ret = '[]';
+	}
+	return JSON.parse(ret)
+}
+// 保存上传图片后返回数据集合
+const setImgDataArr = function(img) {
+	let imgArr = getImgDataArr();
+	imgArr.push({
+		FileOldName: img.FileOldName,
+		FileNewName: img.FileNewName,
+		Url: img.Url,
+		FileSize: img.FileSize,
+		FileType: img.FileType,
+	});
+	uni.setStorageSync(IMGDATAARR, JSON.stringify(imgArr));
+}
+// 清除保存图片集合
+const removeImgArr = function() {
+	uni.removeStorageSync(IMGDATAARR)
+}
+
 export default {
 	SERVICE_URL,
-    addUser,
-    getUsers,
+	addUser,
+	getUsers,
 	removeUser,
 	setPoints,
 	getPoints,
@@ -104,5 +131,8 @@ export default {
 	setLastUploadDate,
 	getLastUploadDate,
 	setAllCondition,
-	getAllCondition
+	getAllCondition,
+	setImgDataArr,
+	getImgDataArr,
+	removeImgArr
 }

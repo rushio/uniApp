@@ -160,7 +160,7 @@
 			}
 			// getUnitEngineeringLists获取本地的所有单位工程
 			this.unitEngineeringLists = service.getUnitEngineeringLists();
-			if (1 <= this.partitionLists.length) {
+			if (0 < this.partitionLists.length) {
 				// 初始化第一个分区的分部分项
 				this.getSubItemLists(this.partitionLists[0], 0)
 			}

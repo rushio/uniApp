@@ -96,7 +96,7 @@
 			conditionCreate() {
 				var att = {
 					FieldName: this.text, // 文本
-					Value: this.index, // 
+					Value: '[]', // JSON.stringify() [{FileOldName:"",FileNewName:"",Url:"",FileSize:"",FileType:""}]
 					Datas: this.imageList // 照片
 				}
 				this.step.Status = this.index; // 施工状态
@@ -110,6 +110,8 @@
 					for (var i = 0; i < this.conditionMode.Steps.length; i++) {
 						if (this.taskId === this.conditionMode.Steps[i].TaskItemID) {
 							count = count + 1;
+							this.conditionMode.Steps[i].Attributes = []
+							this.conditionMode.Steps[i].Attributes.push(att)
 						}
 					}
 					if (count <= 0) {
