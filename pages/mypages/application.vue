@@ -1,22 +1,23 @@
 <template>
 	<view style="padding-top: 30upx;">
 		<view class="uni-grid-9">
-			<view class="uni-grid-9-item" hover-class="uni-grid-9-item-hover" v-for="(item,index) in gridText" :key="index"
+			<view class="uni-grid-9-item" hover-class="uni-grid-9-item-hover" v-for="(item,index) in gridList" :key="index"
 			 :class="index % 3 === 2 ? 'no-border-right' : ''" @click="onClick(index)">
-				<image class="uni-grid-9-image" src="../../static/img/uni@2x.png"></image>
-				<text class="uni-grid-9-text">{{item}}</text>
+				<image class="uni-grid-9-image" :src="item.icon"></image>
+				<text class="uni-grid-9-text">{{item.text}}</text>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
-	
 	export default {
 		data() {
 			return {
-				gridText: ['施工工况'],
-				gridIcon: [],
+				gridList: [{
+					text: '施工工况',
+					icon: '../../static/img/risk_assessment.png'
+				}]
 			};
 		},
 		methods: {

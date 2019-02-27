@@ -4,8 +4,8 @@
 			<view class="uni-input-row-item">
 				<label>施工状态：</label>
 				<view style="background-color: #EEEEEE;">▼</view>
-				<picker mode="selector" @change="bindWorkState" :value="index" :range="workState">
-					<view style="padding-right: 300upx;">{{workState[index]}}</view>
+				<picker mode="selector" @change="bindWorkState" :value="indexWorkState" :range="workState">
+					<view style="padding-right: 300upx;">{{workState[indexWorkState]}}</view>
 				</picker>
 			</view>
 			<block v-for="(list,index) in attributesList" :key="index">
@@ -29,10 +29,28 @@
 					</view>
 				</view>
 				<view v-show="'Dropdownlist' === list.DataType" class="uni-input-row-item">
-					下拉列表
+					<label>下拉列表：</label>
+					<view style="background-color: #EEEEEE;">▼</view>
+					<picker mode="selector" @change="bindDropdownlist" :value="indexDropdownlist" :range="Dropdownlist">
+						<view style="padding-right: 300upx;">{{Dropdownlist[indexDropdownlist]}}</view>
+					</picker>
+					<!-- <radio-group class="uni-flex" @change="bindDropdownlist">
+						<block v-for="(multi, indexDropdownlist) in Dropdownlist" :key="indexDropdownlist">
+							<label>
+								{{ multi }}
+								<radio :checked="indexDropdownlist==1?true:false" value="1" />
+							</label>
+						</block>
+					</radio-group> -->
 				</view>
 				<view v-show="'MultiSelect' === list.DataType" class="uni-input-row-item">
-					多选
+					<label>多选：</label>
+					<checkbox-group class="uni-flex" @change="CheckBoxMultiSelect">
+						<block v-for="(multi, indexMulti) in MultiSelect" :key="indexMulti">
+							<view>{{multi}}</view>
+							<checkbox :value="indexMulti"></checkbox>
+						</block>
+					</checkbox-group>
 				</view>
 			</block>
 			<view class="uni-input-row-item">
@@ -49,9 +67,12 @@
 		data() {
 			return {
 				attributesList: [],
-				index: 0,
+				indexWorkState: 0,
 				workState: ['施工中', '停工', '已竣工', '未开工'],
 				imageList: [],
+				indexDropdownlist: 0,
+				Dropdownlist: [],
+				MultiSelect: [],
 				mark: '',
 				text: '',
 				conditionMode: '',
@@ -63,7 +84,10 @@
 			bindWorkState: function(e) {
 				//'picker发送选择改变，携带值为' e.target.value
 				//console.log("Statevalue => " + e.target.value)
-				this.index = e.target.value
+				this.indexWorkState = e.target.value
+			},
+			bindDropdownlist: function(e) {
+				this.indexDropdownlist = e.target.value
 			},
 			bindPicture: function() {
 				if (this.imageList.length === 5) {
@@ -124,7 +148,7 @@
 						if ("MultiSelect" === attributes.DataType) {}
 					}
 				}
-				this.step.Status = parseInt(this.index) + 1; // 施工状态
+				this.step.Status = parseInt(this.indexWorkState) + 1; // 施工状态
 				this.step.Mark = this.mark // 备注
 				this.step.Attributes = []
 				this.step.Attributes = attArr;
@@ -158,6 +182,15 @@
 			if (undefined != load.att && "" != JSON.parse(load.att)) {
 				this.attributesList = JSON.parse(load.att);
 				//console.log("this.attributesList => " + JSON.stringify(this.attributesList))
+				for (var i = 0; i < this.attributesList.length; i++) {
+					var att = this.attributesList[i];
+					if ("Dropdownlist" === att.DataType) {
+						this.Dropdownlist = JSON.parse(att.Datas).datasource;
+					}
+					if ("MultiSelect" === att.DataType) {
+						this.MultiSelect = JSON.parse(att.Datas).datasource
+					}
+				};
 			}
 			if (undefined != load.conditionMode && "" != JSON.parse(load.conditionMode)) {
 				this.conditionMode = JSON.parse(load.conditionMode)
@@ -166,20 +199,21 @@
 					for (var i = 0; i < this.conditionMode.Steps.length; i++) {
 						var step = this.conditionMode.Steps[i];
 						if (load.taskId === step.TaskItemID) {
-							this.index = parseInt(step.Status) - 1
+							this.indexWorkState = parseInt(step.Status) - 1
 							this.mark = step.Mark
 							var attArr = step.Attributes;
 							if(0 < attArr.length) {
 								for (var i = 0; i < attArr.length; i++) {
 									//console.log("DataType => "+ attArr[i].DataType);
-									if ("Text" === attArr[i].DataType) {
-										this.text = attArr[i].Value
+									var att = attArr[i];
+									if ("Text" === att.DataType) {
+										this.text = att.Value
 									}
-									if ("Upload" === attArr[i].DataType) {
-										this.imageList = JSON.parse(attArr[i].Value)
+									if ("Upload" === att.DataType) {
+										this.imageList = JSON.parse(att.Value)
 									}
-									if ("Dropdownlist" === attArr[i].DataType) {}
-									if ("MultiSelect" === attArr[i].DataType) {}
+									if ("Dropdownlist" === att.DataType) {}
+									if ("MultiSelect" === att.DataType) {}
 								}
 							}
 						}

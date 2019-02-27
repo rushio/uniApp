@@ -270,6 +270,17 @@
 							uploadTask.abort();
 						}
 					}); */
+					
+					// 将上传成功的图片本地保存
+					uni.saveImageToPhotosAlbum({
+						filePath: imgs[i],
+						success: function(entry) {
+							//console.log('saveImage => success');
+						},
+						fail: function() {
+							//console.log("saveImage => fail");
+						}
+					});
 				}
 			},
 			conditionCheck: function(index, con) {
