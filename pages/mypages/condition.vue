@@ -341,7 +341,7 @@
 			var pages = getCurrentPages();
 			var page = pages[pages.length - 1]
 			if (undefined != page.data.conditionMode && "" != page.data.conditionMode) {
-				console.log("data.conditionMode => "+ page.data.conditionMode);
+				//console.log("data.conditionMode => "+ page.data.conditionMode);
 				var mode = JSON.parse(page.data.conditionMode);
 				// 给Steps进行JSON.stringify()，和Save接口格式保持统一
 				// mode.Steps = JSON.stringify(mode.Steps)

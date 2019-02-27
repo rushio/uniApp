@@ -15,7 +15,7 @@
 	export default {
 		data() {
 			return {
-				gridText: ['工况'],
+				gridText: ['施工工况'],
 				gridIcon: [],
 			};
 		},

@@ -108,7 +108,7 @@
 		"selectedColor": "#0faeff",
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
-		"list": [{
+		"list": [/* {
 				"pagePath": "pages/mypages/order",
 				"iconPath": "static/img/order.png",
 				"selectedIconPath": "static/img/orderHL.png",
@@ -118,7 +118,7 @@
 				"iconPath": "static/img/info.png",
 				"selectedIconPath": "static/img/infoHL.png",
 				"text": "信息"
-			}, {
+			}, */{
 				"pagePath": "pages/mypages/application",
 				"iconPath": "static/img/application.png",
 				"selectedIconPath": "static/img/applicationHL.png",

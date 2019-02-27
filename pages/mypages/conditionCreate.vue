@@ -164,12 +164,14 @@
 				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode))
 				if (JSON.parse(load.checked)) {
 					for (var i = 0; i < this.conditionMode.Steps.length; i++) {
-						if (load.taskId === this.conditionMode.Steps[i].TaskItemID) {
-							this.index = parseInt(this.conditionMode.Steps[i].Status) - 1
-							this.mark = this.conditionMode.Steps[i].Mark
-							var attArr = this.conditionMode.Steps[i].Attributes;
+						var step = this.conditionMode.Steps[i];
+						if (load.taskId === step.TaskItemID) {
+							this.index = parseInt(step.Status) - 1
+							this.mark = step.Mark
+							var attArr = step.Attributes;
 							if(0 < attArr.length) {
 								for (var i = 0; i < attArr.length; i++) {
+									//console.log("DataType => "+ attArr[i].DataType);
 									if ("Text" === attArr[i].DataType) {
 										this.text = attArr[i].Value
 									}

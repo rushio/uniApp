@@ -6,11 +6,12 @@
 		<view class="input-group">
 			<view class="input-row border">
 				<text class="title">账号：</text>
-				<input type="text" maxlength="10" confirm-type="next" v-model="account" placeholder="请输入账号">
+				<input type="text" maxlength="10" confirm-type="next" v-focus v-model="account" placeholder="请输入账号">
 			</view>
 			<view class="input-row">
 				<text class="title">密码：</text>
-				<input type="text" maxlength="10" :password="inputType==='password'&&showPassword" confirm-type="done"  v-model="password" placeholder="请输入密码">
+				<input type="text" maxlength="10" :password="inputType==='password'&&showPassword" confirm-type="done" v-model="password"
+				 placeholder="请输入密码">
 				<view class="icon-eys-position">
 					<view class="uni-icon uni-icon-eye" :class="[!showPassword ? 'uni-active' : '']" @click="changePassword"></view>
 				</view>
@@ -19,7 +20,7 @@
 		<view class="btn-row">
 			<button type="primary" class="primary" @click="bindLogin">登录</button>
 		</view>
-		<view>
+		<view v-if="false">
 			<navigator url="setting" hover-class="navigator-hover">
 				<text class="text">设置</text>
 			</navigator>
@@ -58,14 +59,14 @@
 					return;
 				}
 				var userInfo = {
-						username: this.account,
-						password: this.password
-					}
+					username: this.account,
+					password: this.password
+				}
 				uni.request({
-					url: server.SERVICE_URL+ 'mAccount/LogOn',
+					url: server.SERVICE_URL + 'mAccount/LogOn',
 					data: userInfo,
 					success(object) {
-						if(object.statusCode === 200) {
+						if (object.statusCode === 200) {
 							var obj = JSON.stringify(object.data);
 							//console.log(obj)
 							if (obj != "[]") {
@@ -74,6 +75,10 @@
 									password: userInfo.password,
 									UnitID: object.data.UnitID,
 									UnitName: object.data.UnitName,
+									UnitTypeName: object.data.UnitTypeName,
+									TelephoneNum: object.data.TelephoneNum,
+									Sex: object.data.Sex,
+									Email: object.data.Email,
 									Token: object.data.Token
 								};
 								// 本地存储用户信息
@@ -99,7 +104,15 @@
 						});
 					}
 				})
-				
+
+			}
+		},
+		directives: {
+			focus: {
+				// 指令的定义
+				inserted: function(el) {
+					el.focus()
+				}
 			}
 		}
 	}
