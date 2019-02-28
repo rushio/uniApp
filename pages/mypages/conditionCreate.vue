@@ -12,11 +12,11 @@
 				<view v-show="'Text' === list.DataType">
 					<view class="uni-input-row-item">
 						<label>{{list.DisplayName}}：</label>
-						<textarea class="uni-input-textarea" v-model="text" :value="text" placeholder="请说明..."></textarea>
+						<textarea class="uni-input-textarea" v-model="list.Value" :value="list.Value" placeholder="请说明..."></textarea>
 					</view>
 				</view>
 				<view v-show="'Upload' === list.DataType" class="uni-input-row-item">
-					<label style="padding-top: 15upx;">现场影像：</label>
+					<label style="padding-top: 15upx;">{{list.DisplayName}}：</label>
 					<view class="uni-uploader__files">
 						<block v-for="(image,imgKey) in imageList" :key="imgKey">
 							<view class="uni-uploader__file">
@@ -29,13 +29,13 @@
 					</view>
 				</view>
 				<view v-show="'Dropdownlist' === list.DataType" class="uni-input-row-item">
-					<label>下拉列表：</label>
+					<label>{{list.DisplayName}}：</label>
 					<view style="background-color: #EEEEEE;">▼</view>
-					<picker mode="selector" @change="bindDropdownlist" :value="indexDropdownlist" :range="Dropdownlist">
-						<view style="padding-right: 300upx;">{{Dropdownlist[indexDropdownlist]}}</view>
+					<picker mode="selector" @change="bindDropdownlist" :value="indexDropdownlist" :range="list.Datas">
+						<view style="padding-right: 300upx;">{{list.Datas[indexDropdownlist]}}</view>
 					</picker>
 					<!-- <radio-group class="uni-flex" @change="bindDropdownlist">
-						<block v-for="(multi, indexDropdownlist) in Dropdownlist" :key="indexDropdownlist">
+						<block v-for="(multi, indexDropdownlist) in list.Datas" :key="indexDropdownlist">
 							<label>
 								{{ multi }}
 								<radio :checked="indexDropdownlist==1?true:false" value="1" />
@@ -44,9 +44,9 @@
 					</radio-group> -->
 				</view>
 				<view v-show="'MultiSelect' === list.DataType" class="uni-input-row-item">
-					<label>多选：</label>
-					<checkbox-group class="uni-flex" @change="CheckBoxMultiSelect">
-						<block v-for="(multi, indexMulti) in MultiSelect" :key="indexMulti">
+					<label>{{list.DisplayName}}：</label>
+					<checkbox-group class="uni-flex" @change="bindMultiSelect()">
+						<block v-for="(multi, indexMulti) in list.Datas" :key="indexMulti">
 							<view>{{multi}}</view>
 							<checkbox :value="indexMulti"></checkbox>
 						</block>
@@ -71,10 +71,8 @@
 				workState: ['施工中', '停工', '已竣工', '未开工'],
 				imageList: [],
 				indexDropdownlist: 0,
-				Dropdownlist: [],
-				MultiSelect: [],
+				multiSelectList: [],
 				mark: '',
-				text: '',
 				conditionMode: '',
 				taskId: '',
 				step: ''
@@ -88,6 +86,22 @@
 			},
 			bindDropdownlist: function(e) {
 				this.indexDropdownlist = e.target.value
+			},
+			bindMultiSelect: function(e) {
+				/* var items = multiList,
+					values = e.detail.value;
+				this.multiSelectList = [];
+				for (var i = 0, lenI = items.length; i < lenI; ++i) {
+					items[i].checked = false;
+					for (var j = 0, lenJ = values.length; j < lenJ; ++j) {
+						if (items.indexOf(items[i]) == values[j]) {
+							items[i].checked = true;
+							this.multiSelectList.push(items[i])
+							break
+						}
+					}
+				} */
+				//console.log("this.multiSelectList size "+ this.multiSelectList.length+ " => "+ JSON.stringify(this.multiSelectList));
 			},
 			bindPicture: function() {
 				if (this.imageList.length === 5) {
@@ -124,28 +138,36 @@
 				})
 			},
 			conditionCreate() {
+				//console.log("this.attributesList => " + JSON.stringify(this.attributesList));
 				var attArr = []
 				if (0 < this.attributesList.length) {
 					for (var i = 0; i < this.attributesList.length; i++) {
 						var att = {
 							FieldName: '', // 文本
+							DisplayName: '',
 							Value: '[]', // JSON.stringify() [{FileOldName:"",FileNewName:"",Url:"",FileSize:"",FileType:""}]
 							DataType: ''
 						}
 						var attributes = this.attributesList[i];
-						//console.log("attributes => " + JSON.stringify(attributes));
 						att.FieldName = attributes.FieldName;
+						att.DisplayName = attributes.DisplayName;
 						att.DataType = attributes.DataType
 						if ("Text" === attributes.DataType) {
-							att.Value = this.text
-							attArr.push(att)
+							att.Value = attributes.Value;
+							attArr.push(att);
 						}
 						if ("Upload" === attributes.DataType) {
 							att.Value = JSON.stringify(this.imageList); // 照片集合
-							attArr.push(att)
+							attArr.push(att);
 						}
-						if ("Dropdownlist" === attributes.DataType) {}
-						if ("MultiSelect" === attributes.DataType) {}
+						if ("Dropdownlist" === attributes.DataType) {
+							att.Value = this.indexDropdownlist;
+							attArr.push(att);
+						}
+						if ("MultiSelect" === attributes.DataType) {
+							att.Value = JSON.stringify(this.multiSelectList);
+							attArr.push(att);
+						}
 					}
 				}
 				this.step.Status = parseInt(this.indexWorkState) + 1; // 施工状态
@@ -180,17 +202,31 @@
 		},
 		onLoad(load) {
 			if (undefined != load.att && "" != JSON.parse(load.att)) {
-				this.attributesList = JSON.parse(load.att);
-				//console.log("this.attributesList => " + JSON.stringify(this.attributesList))
-				for (var i = 0; i < this.attributesList.length; i++) {
-					var att = this.attributesList[i];
+				var attList = JSON.parse(load.att);
+				for (var i = 0; i < attList.length; i++) {
+					var attribute = {
+						FieldName: '',
+						DisplayName: '',
+						DataType: '',
+						Datas: '',
+						SiteAreaID: '',
+						Value: '',
+					}
+					var att = attList[i];
+					// 重构attributes
+					attribute.FieldName = att.FieldName;
+					attribute.DisplayName = att.DisplayName;
+					attribute.DataType = att.DataType;
 					if ("Dropdownlist" === att.DataType) {
-						this.Dropdownlist = JSON.parse(att.Datas).datasource;
+						attribute.Datas = JSON.parse(att.Datas).datasource;
 					}
 					if ("MultiSelect" === att.DataType) {
-						this.MultiSelect = JSON.parse(att.Datas).datasource
+						attribute.Datas = JSON.parse(att.Datas).datasource
 					}
+					attribute.SiteAreaID = att.SiteAreaID;
+					this.attributesList.push(attribute);
 				};
+				//console.log("this.attributesList => " + JSON.stringify(this.attributesList))
 			}
 			if (undefined != load.conditionMode && "" != JSON.parse(load.conditionMode)) {
 				this.conditionMode = JSON.parse(load.conditionMode)
@@ -200,20 +236,24 @@
 						var step = this.conditionMode.Steps[i];
 						if (load.taskId === step.TaskItemID) {
 							this.indexWorkState = parseInt(step.Status) - 1
-							this.mark = step.Mark
+							this.mark = step.Mark;
 							var attArr = step.Attributes;
 							if(0 < attArr.length) {
 								for (var i = 0; i < attArr.length; i++) {
-									//console.log("DataType => "+ attArr[i].DataType);
 									var att = attArr[i];
-									if ("Text" === att.DataType) {
-										this.text = att.Value
+									for (var j = 0; j < this.attributesList.length; j++) {
+										var attributes = this.attributesList[j];
+										if (att.DisplayName === attributes.DisplayName) {
+											attributes.Value = att.Value;
+											if ("Upload" === attributes.DataType) {
+												this.imageList = JSON.parse(att.Value)
+											}
+											if ("Dropdownlist" === attributes.DataType) {
+												this.indexDropdownlist = parseInt(att.Value);
+											}
+											if ("MultiSelect" === attributes.DataType) {}
+										}
 									}
-									if ("Upload" === att.DataType) {
-										this.imageList = JSON.parse(att.Value)
-									}
-									if ("Dropdownlist" === att.DataType) {}
-									if ("MultiSelect" === att.DataType) {}
 								}
 							}
 						}

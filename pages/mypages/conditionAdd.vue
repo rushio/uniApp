@@ -50,7 +50,8 @@
 				Mark: '',
 				radioValue: 1,
 				conditionMode: '',
-				checked: false
+				checked: false,
+				isField: false
 			}
 		},
 		methods: {
@@ -122,9 +123,16 @@
 			conditionChecked() {
 				// 判断是否检查工况
 				if (undefined === this.conditionMode || "" === this.conditionMode) {
-					uni.navigateTo({
-						url: './conditionSelect'
-					})
+					console.log("this.isFiele => "+ this.isField);
+					if (this.isField) {
+						uni.navigateTo({
+							url: './conditionSelectField'
+						})
+					} else {
+						uni.navigateTo({
+							url: './conditionSelect'
+						})
+					}
 				}
 			},
 			bindDateChange: function(e) {
@@ -161,6 +169,14 @@
 			if (undefined != page.data.siteId) {
 				this.siteId = page.data.siteId;
 				//console.log(this.siteId)
+			}
+			var telsafe = service.SERVICE_URL.indexOf("telsafe.com");
+			console.log("telsafe => "+ telsafe);
+			// 判断服务地址是否域名
+			if (0 < telsafe) {
+				this.isField = true;
+			} else {
+				this.isField = false;
 			}
 		}
 	}
