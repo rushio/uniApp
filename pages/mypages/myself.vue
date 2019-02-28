@@ -4,7 +4,9 @@
 			<image class="logo-img" :src="avatarUrl"></image>
 			<view class="logo-title">
 				<text class="uer-name" @click="bindUser">Hi，{{userInfo.account}}</text>
-				<view v-show="!isLogin" class="go-login" :hover-class="!login ? 'logo-hover' : ''" @click="toLogin">去登录></view>
+				<view v-show="!isLogin" class="go-login">
+					<navigator url="login" open-type="reLaunch" hover-class="navigator-hover">去登录></navigator>
+				</view>
 			</view>
 		</view>
 		<view v-show="isLogin" style="flex-direction: column;">
@@ -51,17 +53,14 @@
 			},
 			bindUser() {
 				console.log("this.userInfo => " + JSON.stringify(this.userInfo))
-			},
-			toLogin: function() {
-				uni.navigateTo({
-					url: './login'
-				})
 			}
 		},
 		onShow() {
 			uni.setNavigationBarTitle({
 				title: "我的"
 			})
+		},
+		onLoad() {
 			//console.log("service.getUsers => "+ JSON.stringify(service.getUsers()));
 			if ("[]" === JSON.stringify(service.getUsers())) {
 				this.isLogin = false;

@@ -138,7 +138,7 @@
 			if (undefined != page.data.conditionMode && "" != page.data.conditionMode) {
 				//console.log("data.conditionMode => "+ page.data.conditionMode);
 				this.conditionMode = JSON.parse(page.data.conditionMode)
-				page.data.conditionMode = undefined;  //设置undefined防止重复添加
+				page.data.conditionMode = undefined; //设置undefined防止重复添加
 			}
 			// 判断是否检查工况，根据checked添加背景色标识
 			for (var list = 0; list < this.subItemLists.length; list++) {
@@ -154,15 +154,15 @@
 		},
 		onLoad: function(load) {
 			this.height = uni.getSystemInfoSync().windowHeight - 50;
+			// getUnitEngineeringLists获取本地的所有单位工程
+			this.unitEngineeringLists = service.getUnitEngineeringLists();
 			if (undefined != load.pointLists && "" != load.pointLists) {
 				this.partitionLists = JSON.parse(load.pointLists);
 				//console.log("partitionLists size "+ this.partitionLists.length+ " => "+ JSON.stringify(this.partitionLists))
-			}
-			// getUnitEngineeringLists获取本地的所有单位工程
-			this.unitEngineeringLists = service.getUnitEngineeringLists();
-			if (0 < this.partitionLists.length) {
-				// 初始化第一个分区的分部分项
-				this.getSubItemLists(this.partitionLists[0], 0)
+				if (0 < this.partitionLists.length) {
+					// 初始化第一个分区的分部分项
+					this.getSubItemLists(this.partitionLists[0], 0)
+				}
 			}
 			if (undefined != load.conditionMode && "" != load.conditionMode) {
 				this.conditionMode = JSON.parse(load.conditionMode)

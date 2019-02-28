@@ -2,8 +2,9 @@
 const USERS_KEY = 'USERS_KEY';
 const STATE_KEY = 'STATE_KEY';
 // 服务器地址
-// const SERVICE_URL = 'http://192.168.90.202:8081/';
-const SERVICE_URL = 'http://192.168.191.1:8080/'; // 本机ip
+// const SERVICE_URL = 'http://192.168.90.202:8081/'; // 贾经理
+// const SERVICE_URL = 'http://192.168.191.1:8080/'; // 本机ip
+const SERVICE_URL = 'http://sz-demo.telsafe.com.cn/'; // 域名
 
 // 获取用户信息
 const getUsers = function() {
