@@ -51,7 +51,8 @@
 				radioValue: 1,
 				conditionMode: '',
 				checked: false,
-				isField: false
+				isField: false,
+				listIndex: 0
 			}
 		},
 		methods: {
@@ -81,11 +82,14 @@
 					Steps: [] ,//JSON.stringify()
 					Time: ''
 				}
-				var id = this.siteId,conMode = mode,checked = this.checked
+				var id = this.siteId,conMode = mode,checked = this.checked,listIndex = this.listIndex
 				// 判断是新建工况还是检查工况 新建false：获取工点下分区，否则true获取当前工况下ID
 				if (this.checked) {
 					id = this.conditionMode.CurrentSiteID
 					conMode = this.conditionMode
+					conMode.Status = mode.Status
+					conMode.StepDate = mode.StepDate
+					conMode.Mark = mode.Mark
 				}
 				uni.request({
 					url: service.SERVICE_URL + 'MCsp/GetSiteAreas',
@@ -102,7 +106,7 @@
 							uni.navigateTo({
 								//url: './conditionPartition'
 								url: './conditionPartitionLeft?pointLists=' + JSON.stringify(succ.data) + 
-								'&conditionMode=' + JSON.stringify(conMode) + "&checked=" + checked
+								'&conditionMode=' + JSON.stringify(conMode) + "&checked=" + checked + "&listIndex=" + listIndex
 							})
 						} else {
 							console.log("获取分区失败 => " + succ.statusCode)
@@ -158,6 +162,10 @@
 				this.checked = load.checked;
 				//console.log("this.checked => "+ this.checked);
 			}
+			if (undefined != load.listIndex && "" != load.listIndex) {
+				this.listIndex = load.listIndex;
+				//console.log("this.listIndex => "+ this.listIndex);
+			}
 		},
 		onShow() {
 			var pages = getCurrentPages();
@@ -165,10 +173,12 @@
 			if (undefined != page.data.point) {
 				this.conditionName = page.data.point;
 				//console.log(this.conditionName)
+				page.data.point = undefined;
 			}
 			if (undefined != page.data.siteId) {
 				this.siteId = page.data.siteId;
 				//console.log(this.siteId)
+				page.data.siteId = undefined;
 			}
 			var telsafe = service.SERVICE_URL.indexOf("telsafe.com");
 			// 判断服务地址是否域名

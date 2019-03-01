@@ -82,7 +82,7 @@
 					uni.request({
 						url: service.SERVICE_URL + 'MCsp/GetConstructionStepList',
 						success(succ) {
-							console.log("succ => "+ JSON.stringify(succ));
+							console.log("succ => " + JSON.stringify(succ));
 						},
 						fail() {
 							console.log("fail => 获取本用户上传的施工工况列表");
@@ -134,7 +134,7 @@
 					for (var step = 0; step < list.Steps.length; step++) {
 						var attArr = list.Steps[step].Attributes;
 						var imgs = [];
-						if(0 < attArr.length) {
+						if (0 < attArr.length) {
 							for (var i = 0; i < attArr.length; i++) {
 								// 从Attributes中获取图片集合
 								if ("Upload" === attArr[i].DataType) {
@@ -153,7 +153,7 @@
 								//console.log("valueArr => " + JSON.stringify(valueArr));
 								service.removeImgArr();
 								// 将组装好的图片信息JSON.stringify()后存放在Attributes中Upload下的Value中
-								if(0 < attArr.length) {
+								if (0 < attArr.length) {
 									for (var i = 0; i < attArr.length; i++) {
 										if ("Upload" === attArr[i].DataType) {
 											attArr[i].Value = JSON.stringify(valueArr);
@@ -195,7 +195,7 @@
 									console.log("fail => MCsp/Save");
 								},
 								complete() {
-									_this.localList.splice(_this.localList.indexOf(list),1);
+									_this.localList.splice(_this.localList.indexOf(list), 1);
 									_this.submitList.splice(0, 1);
 									var _localList = _this.localList;
 									if (0 < _localList.length) {
@@ -272,7 +272,7 @@
 							uploadTask.abort();
 						}
 					}); */
-					
+
 					// 将上传成功的图片本地保存
 					uni.saveImageToPhotosAlbum({
 						filePath: imgs[i],
@@ -298,7 +298,7 @@
 				}
 				//console.log("con => "+ JSON.stringify(con));
 				uni.navigateTo({
-					url: './conditionAdd?conditionMode=' + JSON.stringify(con) + "&checked=true"
+					url: './conditionAdd?conditionMode=' + JSON.stringify(con) + "&checked=true&listIndex=" + this.listIndex
 				})
 			}
 		},
@@ -355,9 +355,13 @@
 			this.getUnitEngineerings()
 		},
 		onShow() {
-			if (undefined != service.getAllCondition() && "" != service.getAllCondition()) {
-				//console.log("this.localList => "+ JSON.stringify(service.getAllCondition()));
-				this.localList = service.getAllCondition()
+			var pages = getCurrentPages();
+			var page = pages[pages.length - 1]
+			if (undefined === page.data.button || "" === page.data.button) {
+				if (undefined != service.getAllCondition() && "" != service.getAllCondition()) {
+					//console.log("this.localList => "+ JSON.stringify(service.getAllCondition()));
+					this.localList = service.getAllCondition()
+				}
 			}
 		}
 	}

@@ -55,7 +55,8 @@
 				partitionValue: '',
 				subID: '',
 				subName: '',
-				checked: false
+				checked: false,
+				listIndex: 0
 			}
 		},
 		methods: {
@@ -99,7 +100,7 @@
 						for (var j = 0; j < subItemList.length; j++) {
 							var subItem = subItemList[j];
 							// 判断当前分区下的分部分项是否被检查
-							if(step.AreaID === value && step.SubItemID === subItem.id) {
+							if (step.AreaID === value && step.SubItemID === subItem.id) {
 								for (var k = 0; k < subItem.items.length; k++) {
 									var item = subItem.items[k];
 									if (step.TaskItemID === item.id) {
@@ -113,14 +114,14 @@
 			},
 			toConditionCreate(item, attributes) {
 				/**
-				* id：表示工序的id
-				* attributes：表示工序的att
-				*/
+				 * item：表示工序
+				 * attributes：表示工序的att
+				 */
 				var step = { //JSON.stringify()
 					AreaID: this.partitionValue, // 分区id => Value
 					SubItemID: this.subID, //分部分项id
 					SubName: this.subName, //分部分项名称
-					TaskItemID: item.id, // 工程类型 -> 分部分项 -> 工序item:id
+					TaskItemID: item.id, // 工程类型 -> 分部分项 -> 工序item.id
 					Name: item.name, // 工序名称
 					CspTaskItemID: '', //
 					Status: '', // 表示施工状态共4种 => 数字
@@ -129,7 +130,7 @@
 				}
 				uni.navigateTo({
 					url: './conditionCreate?att=' + attributes + "&conditionMode=" + JSON.stringify(this.conditionMode) +
-					"&checked=" + item.checked + "&taskId=" + item.id+ "&step="+ JSON.stringify(step)
+						"&checked=" + item.checked + "&step=" + JSON.stringify(step)
 				})
 			},
 			trigerCollapse(sub, e) {
@@ -146,11 +147,27 @@
 				}
 			},
 			toCondition(sure) {
+				var pages = getCurrentPages();
+				var page = pages[pages.length - 3]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
 				if ("cancel" === sure) {
-					this.conditionMode = undefined
+					page.setData({
+						button: "cancel"
+					})
 				} else {
 					this.conditionMode.Time = new Date().getTime();
-					service.setAllCondition(this.conditionMode)
+					if (JSON.parse(this.checked)) {
+						var allList = service.getAllCondition()
+						if (0 < allList.length) {
+							allList.splice(this.listIndex, 1, this.conditionMode);
+							service.removeAllCondition();
+							for (var i = 0; i < allList.length; i++) {
+								service.setAllCondition(allList[i]);
+							}
+						}
+					} else {
+						service.setAllCondition(this.conditionMode)
+					}
+					//console.log("this.condtitionMode => "+ JSON.stringify(this.conditionMode));
 				}
 				uni.navigateBack({
 					delta: 2
@@ -161,6 +178,7 @@
 			uniIcon
 		},
 		onShow() {
+			this.height = uni.getSystemInfoSync().windowHeight - 50;
 			var pages = getCurrentPages();
 			var page = pages[pages.length - 1]
 			if (undefined != page.data.conditionMode && "" != page.data.conditionMode) {
@@ -171,7 +189,10 @@
 			this.checkSubItem(this.conditionMode, this.subItemLists, this.partitionValue);
 		},
 		onLoad: function(load) {
-			this.height = uni.getSystemInfoSync().windowHeight - 50;
+			if (undefined != load.conditionMode && "" != load.conditionMode) {
+				this.conditionMode = JSON.parse(load.conditionMode)
+				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode))
+			}
 			// getUnitEngineeringLists获取本地的所有单位工程
 			this.unitEngineeringLists = service.getUnitEngineeringLists();
 			if (undefined != load.pointLists && "" != load.pointLists) {
@@ -182,13 +203,13 @@
 					this.getSubItemLists(this.partitionLists[0], 0)
 				}
 			}
-			if (undefined != load.conditionMode && "" != load.conditionMode) {
-				this.conditionMode = JSON.parse(load.conditionMode)
-				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode))
-			}
 			if (undefined != load.checked && "" != load.checked) {
 				this.checked = load.checked
 				//console.log("this.checked => "+ this.checked);
+			}
+			if (undefined != load.listIndex && "" != load.listIndex) {
+				this.listIndex = load.listIndex
+				//console.log("this.listIndex => "+ load.listIndex);
 			}
 		}
 	}

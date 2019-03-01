@@ -74,7 +74,6 @@
 				multiSelectList: [],
 				mark: '',
 				conditionMode: '',
-				taskId: '',
 				step: ''
 			};
 		},
@@ -174,22 +173,32 @@
 				this.step.Mark = this.mark // 备注
 				this.step.Attributes = []
 				this.step.Attributes = attArr;
+				//console.log("this.step => "+ JSON.stringify(this.step));
 				if (this.conditionMode.Steps.length <= 0) {
 					this.conditionMode.Steps.push(this.step)
 				} else {
-					var count = 0;
+					var countFenQu = 0,
+						countGongXu = 0;
 					for (var i = 0; i < this.conditionMode.Steps.length; i++) {
-						if (this.taskId === this.conditionMode.Steps[i].TaskItemID) {
-							count = count + 1;
-							this.conditionMode.Steps[i].Attributes = []
-							this.conditionMode.Steps[i].Attributes = attArr;
+						var condition = this.conditionMode.Steps[i];
+						// 添加时先判断分区
+						if (condition.AreaID === this.step.AreaID) {
+							countFenQu = countFenQu + 1;
+							// 添加时后判断工序
+							if (condition.TaskItemID === this.step.TaskItemID) {
+								countGongXu += 1;
+								this.conditionMode.Steps[i] = this.step;
+							}
 						}
 					}
-					if (count <= 0) {
+					//console.log("countFenQu => " + countFenQu + " --- countGongXu => " + countGongXu);
+					if (countFenQu <= 0) {
+						this.conditionMode.Steps.push(this.step)
+					} else if (countGongXu <= 0) {
 						this.conditionMode.Steps.push(this.step)
 					}
 				}
-				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode))
+				//console.log("this.conditionMode => " + JSON.stringify(this.conditionMode))
 				var pages = getCurrentPages();
 				var page = pages[pages.length - 2]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
 				page.setData({
@@ -201,6 +210,10 @@
 			}
 		},
 		onLoad(load) {
+			if (undefined != load.step && "" != load.step) {
+				this.step = JSON.parse(load.step)
+				// console.log("this.step => "+ load.step);
+			}
 			if (undefined != load.att && "" != JSON.parse(load.att)) {
 				var attList = JSON.parse(load.att);
 				for (var i = 0; i < attList.length; i++) {
@@ -234,11 +247,11 @@
 				if (JSON.parse(load.checked)) {
 					for (var i = 0; i < this.conditionMode.Steps.length; i++) {
 						var step = this.conditionMode.Steps[i];
-						if (load.taskId === step.TaskItemID) {
+						if (this.step.AreaID === step.AreaID && this.step.TaskItemID === step.TaskItemID) {
 							this.indexWorkState = parseInt(step.Status) - 1
 							this.mark = step.Mark;
 							var attArr = step.Attributes;
-							if(0 < attArr.length) {
+							if (0 < attArr.length) {
 								for (var i = 0; i < attArr.length; i++) {
 									var att = attArr[i];
 									for (var j = 0; j < this.attributesList.length; j++) {
@@ -259,14 +272,6 @@
 						}
 					}
 				}
-			}
-			if (undefined != load.taskId && "" != load.taskId) {
-				this.taskId = load.taskId
-				//console.log("this.taskId => "+ this.taskId)
-			}
-			if (undefined != load.step && "" != load.step) {
-				this.step = JSON.parse(load.step)
-				// console.log("this.step => "+ load.step);
 			}
 		}
 	}

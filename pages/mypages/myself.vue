@@ -47,6 +47,7 @@
 		methods: {
 			bindSignOut() {
 				service.removeUser()
+				console.log("set login");
 				uni.reLaunch({
 					url: "./login"
 				})
