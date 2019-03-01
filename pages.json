@@ -7,9 +7,9 @@
 			}
 		}, */
 		{
-			"path": "pages/mypages/myself",
+			"path": "pages/mypages/application",
 			"style": {
-				"navigationBarTitleText": "加载中..."
+				"navigationBarTitleText": "应用"
 			}
 		}, {
 			"path": "pages/mypages/order",
@@ -22,9 +22,9 @@
 				"navigationBarTitleText": "信息"
 			}
 		}, {
-			"path": "pages/mypages/application",
+			"path": "pages/mypages/myself",
 			"style": {
-				"navigationBarTitleText": "应用"
+				"navigationBarTitleText": "加载中..."
 			}
 		}, {
 			"path": "pages/mypages/form-flow",
@@ -77,6 +77,11 @@
 			}
 		}, {
 			"path": "pages/mypages/conditionSelect",
+			"style": {
+				"navigationBarTitleText": "选择工点"
+			}
+		}, {
+			"path": "pages/mypages/conditionSelectField",
 			"style": {
 				"navigationBarTitleText": "选择工点"
 			}

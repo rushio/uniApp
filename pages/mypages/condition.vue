@@ -190,21 +190,23 @@
 											title: '提交失败。'
 										})
 									}
-									_this.localList.splice(_this.localList.indexOf(list),1);
-									_this.submitList.splice(0, 1);
-									var items = _this.localList;
-									for (var i = 0, lenI = items.length; i < lenI; ++i) {
-										items[i].checked = false;
-									}
 								},
 								fail() {
+									console.log("fail => MCsp/Save");
+								},
+								complete() {
 									_this.localList.splice(_this.localList.indexOf(list),1);
 									_this.submitList.splice(0, 1);
-									var items = _this.localList;
-									for (var i = 0, lenI = items.length; i < lenI; ++i) {
-										items[i].checked = false;
+									var _localList = _this.localList;
+									if (0 < _localList.length) {
+										for (var i = 0; i < _localList.length; i++) {
+											_localList[i].checked = false;
+										}
+										service.removeAllCondition()
+										for (var i = 0; i < _localList.length; i++) {
+											service.setAllCondition(_localList[i]);
+										}
 									}
-									console.log("fail => MCsp/Save");
 								}
 							})
 						}, 800)
@@ -303,6 +305,14 @@
 		onNavigationBarButtonTap(data) {
 			//console.log(JSON.stringify(index)) => {"text":"任务","fontSize":"18px","__cb__":{"id":"plus291547100205599","htmlId":"86516565"},"index":0}
 			if (data.index === 0) {
+				if ("[]" === JSON.stringify(service.getUsers())) {
+					console.log("set login")
+					uni.showToast({
+						icon: 'none',
+						title: '请登录身份认证.'
+					})
+					return;
+				}
 				// 获取某工点最后一次施工工况日期
 				uni.request({
 					url: service.SERVICE_URL + 'MCsp/GetLastUploadDate',
@@ -342,32 +352,12 @@
 			uniIcon
 		},
 		onLoad() {
-			if (undefined != service.getAllCondition() && "" != service.getAllCondition()) {
-				this.localList = service.getAllCondition()
-				//console.log("localList => "+ JSON.stringify(service.getAllCondition()));
-			}
 			this.getUnitEngineerings()
 		},
 		onShow() {
-			var pages = getCurrentPages();
-			var page = pages[pages.length - 1]
-			if (undefined != page.data.conditionMode && "" != page.data.conditionMode) {
-				//console.log("data.conditionMode => "+ page.data.conditionMode);
-				var mode = JSON.parse(page.data.conditionMode);
-				// 给Steps进行JSON.stringify()，和Save接口格式保持统一
-				// mode.Steps = JSON.stringify(mode.Steps)
-				if ("true" === page.data.checked) {
-					this.localList.splice(this.listIndex, 1, mode);
-				} else {
-					this.localList.push(mode)
-				}
-				//console.log("this.localList size "+ this.localList.length+ " => "+ this.localList[0].Title)
-				page.data.conditionMode = undefined; // 设置undefined防止重复添加
-			}
-		},
-		onUnload() {
-			if (0 < this.localList.length) {
-				service.setAllCondition(this.localList)
+			if (undefined != service.getAllCondition() && "" != service.getAllCondition()) {
+				//console.log("this.localList => "+ JSON.stringify(service.getAllCondition()));
+				this.localList = service.getAllCondition()
 			}
 		}
 	}

@@ -90,7 +90,13 @@ const getAllCondition = function() {
 }
 // 保存所有没有提交工况检查记录
 const setAllCondition = function(all) {
-	uni.setStorageSync(ALLCONDITION, JSON.stringify(all))
+	let allCon = getAllCondition();
+	allCon.push(all);
+	uni.setStorageSync(ALLCONDITION, JSON.stringify(allCon))
+}
+// 清除所有没有提交工况检查记录
+const removeAllCondition = function() {
+	uni.removeStorageSync(ALLCONDITION)
 }
 
 // 获取上传图片后返回数据集合
@@ -120,6 +126,21 @@ const removeImgArr = function() {
 	uni.removeStorageSync(IMGDATAARR)
 }
 
+// 获取某分区下的分部分项以及工序
+const UNITENGINEERITEMS = 'UNITENGINEERITEMS';
+const getUnitEngineerItems = function() {
+	let ret = '';
+	ret = uni.getStorageSync(UNITENGINEERITEMS);
+	if (!ret) {
+		ret = '[]';
+	}
+	return JSON.parse(ret);
+}
+// 保存某分区下的分部分项以及工序
+const setUnitEngineerItems = function(unitItem) {
+	uni.setStorageSync(UNITENGINEERITEMS, JSON.stringify(unitItem));
+}
+
 export default {
 	SERVICE_URL,
 	addUser,
@@ -133,7 +154,10 @@ export default {
 	getLastUploadDate,
 	setAllCondition,
 	getAllCondition,
+	removeAllCondition,
 	setImgDataArr,
 	getImgDataArr,
-	removeImgArr
+	removeImgArr,
+	setUnitEngineerItems,
+	getUnitEngineerItems
 }

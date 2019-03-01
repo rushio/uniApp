@@ -69,22 +69,55 @@
 				// 分区areaid => Value
 				this.partitionValue = partition.Value;
 				this.subItemLists = [];
+				var count = 0;
 				for (let i = 0; i < this.unitEngineeringLists.length; i++) {
+					const unitEngineer = this.unitEngineeringLists[i];
 					// 获取当前分区对应的工程类型下的分部分项
 					//console.log("Code => "+ partition.ProjectTypeCode+ " -- Data.Code => "+this.unitEngineeringLists[i].Data.Code)
-					if (partition.ProjectTypeCode === this.unitEngineeringLists[i].Data.Code) {
-						this.subItemLists = this.unitEngineeringLists[i].items
-						//console.log("this.subItemLists size "+this.subItemLists.length+ " => "+ JSON.stringify(this.subItemLists))
+					if (partition.ProjectTypeCode === unitEngineer.Data.Code) {
+						count += 1;
+						service.setUnitEngineerItems(unitEngineer.items);
+					}
+				}
+				if (0 >= count) {
+					service.setUnitEngineerItems("");
+				}
+				this.subItemLists = service.getUnitEngineerItems();
+				//console.log("this.subItemLists => "+ JSON.stringify(this.subItemLists))
+				this.checkSubItem(this.conditionMode, this.subItemLists, partition.Value);
+			},
+			// 判断是否检查工况，根据checked添加背景色标识
+			checkSubItem: function(mode, subItemList, value) {
+				/* 
+				 * mode 表示构建的整体数据this.conditionMode
+				 * subItemLsit 所有分部分项及工序
+				 * value 分部分项id
+				 */
+				if (undefined != mode && "" != mode && 0 < mode.Steps.length) {
+					for (var i = 0; i < mode.Steps.length; i++) {
+						var step = mode.Steps[i];
+						for (var j = 0; j < subItemList.length; j++) {
+							var subItem = subItemList[j];
+							// 判断当前分区下的分部分项是否被检查
+							if(step.AreaID === value && step.SubItemID === subItem.id) {
+								for (var k = 0; k < subItem.items.length; k++) {
+									var item = subItem.items[k];
+									if (step.TaskItemID === item.id) {
+										item.checked = true;
+									}
+								}
+							}
+						}
 					}
 				}
 			},
-			/**
-			 * id：表示工序的id
-			 * attributes：表示工序的att
-			 */
 			toConditionCreate(item, attributes) {
+				/**
+				* id：表示工序的id
+				* attributes：表示工序的att
+				*/
 				var step = { //JSON.stringify()
-					AreaID: this.partitionValue, // 分区 => Value
+					AreaID: this.partitionValue, // 分区id => Value
 					SubItemID: this.subID, //分部分项id
 					SubName: this.subName, //分部分项名称
 					TaskItemID: item.id, // 工程类型 -> 分部分项 -> 工序item:id
@@ -116,13 +149,8 @@
 				if ("cancel" === sure) {
 					this.conditionMode = undefined
 				} else {
-					var pages = getCurrentPages();
-					var page = pages[pages.length - 3]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
-					//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode));
-					page.setData({
-						conditionMode: JSON.stringify(this.conditionMode),
-						checked: this.checked
-					})
+					this.conditionMode.Time = new Date().getTime();
+					service.setAllCondition(this.conditionMode)
 				}
 				uni.navigateBack({
 					delta: 2
@@ -140,17 +168,7 @@
 				this.conditionMode = JSON.parse(page.data.conditionMode)
 				page.data.conditionMode = undefined; //设置undefined防止重复添加
 			}
-			// 判断是否检查工况，根据checked添加背景色标识
-			for (var list = 0; list < this.subItemLists.length; list++) {
-				for (var item = 0; item < this.subItemLists[list].items.length; item++) {
-					for (var step = 0; step < this.conditionMode.Steps.length; step++) {
-						//console.log("item.id => "+ this.subItemLists[list].items[item].id+ " --- steps.ID => "+ this.condition.Steps[step].TaskItemID);
-						if (this.subItemLists[list].items[item].id === this.conditionMode.Steps[step].TaskItemID) {
-							this.subItemLists[list].items[item].checked = true;
-						}
-					}
-				}
-			}
+			this.checkSubItem(this.conditionMode, this.subItemLists, this.partitionValue);
 		},
 		onLoad: function(load) {
 			this.height = uni.getSystemInfoSync().windowHeight - 50;

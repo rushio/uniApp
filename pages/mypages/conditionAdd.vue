@@ -78,7 +78,8 @@
 					CurrentSiteID: this.siteId, // 工点ID
 					Mark: this.Mark, // 补充说明
 					Title: this.conditionName, // 用于列表名称展示
-					Steps: [] //JSON.stringify()
+					Steps: [] ,//JSON.stringify()
+					Time: ''
 				}
 				var id = this.siteId,conMode = mode,checked = this.checked
 				// 判断是新建工况还是检查工况 新建false：获取工点下分区，否则true获取当前工况下ID
@@ -123,7 +124,6 @@
 			conditionChecked() {
 				// 判断是否检查工况
 				if (undefined === this.conditionMode || "" === this.conditionMode) {
-					console.log("this.isFiele => "+ this.isField);
 					if (this.isField) {
 						uni.navigateTo({
 							url: './conditionSelectField'
@@ -171,7 +171,6 @@
 				//console.log(this.siteId)
 			}
 			var telsafe = service.SERVICE_URL.indexOf("telsafe.com");
-			console.log("telsafe => "+ telsafe);
 			// 判断服务地址是否域名
 			if (0 < telsafe) {
 				this.isField = true;
