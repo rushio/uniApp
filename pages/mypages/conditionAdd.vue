@@ -4,7 +4,7 @@
 		<view class="uni-input-group">
 			<view class="uni-input-row-item">
 				<label>工点(必填)：</label>
-				<input disabled="true" @click="conditionChecked" :value="conditionName" placeholder="请选择工点..." />
+				<input disabled="true" @click="conditionChecked" :value="siteName" placeholder="请选择工点..." />
 			</view>
 			<view class="uni-input-row-item">
 				<label>填&nbsp;&nbsp;&nbsp;&nbsp;报&nbsp;&nbsp;&nbsp;人：</label>
@@ -22,9 +22,11 @@
 			<view class="uni-input-row-item">
 				<label>日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;期：</label>
 				<picker mode="date" :value="todayDate" :start="startDate" :end="endDate" @change="bindDateChange">
-					<input disabled="true" :value="todayDate" />
+					<view class="input_date_picker">
+						<input disabled="true" :value="todayDate" />
+						<text class="iconfont">&#xe609;</text>
+					</view>
 				</picker>
-				<text class="iconfont" @click="bindDateChange">&#xe609;</text>
 			</view>
 			<view class="uni-input-row-item">
 				<label>补充说明：</label>
@@ -45,6 +47,7 @@
 				startDate: '0001-01-01',
 				endDate: '',
 				conditionName: '',
+				siteName: '',
 				username: '',
 				siteId: '',
 				Mark: '',
@@ -61,12 +64,46 @@
 				this.radioValue = evt.target.value;
 			},
 			toConditionPartitionLeft: function() {
-				if (undefined === this.conditionName || "" === this.conditionName) {
+				if (undefined === this.siteName || "" === this.siteName) {
 					uni.showToast({
 						icon: 'none',
 						title: '请选择工点.'
 					})
 					return;
+				}
+				var conditionList = service.getAllCondition();
+				// 检索本地工况集合
+				if (0 < conditionList.length) {
+					var today = '0000-00-00';
+					for (var i = 0; i < conditionList.length; i++) {
+						var cond = conditionList[i];
+						if (cond.CurrentSiteID === this.siteId && cond.siteName === this.siteName) {
+							// 同一个工点一天只能有一个工况
+							if (cond.StepDate === this.todayDate) {
+								uni.showToast({
+									icon: 'none',
+									title: '该工况已经创建.',
+									mask: false,
+									duration: 1500
+								});
+								return;
+							}
+							var isBig = now.compareDate(today, cond.StepDate);
+							if (isBig) {
+								today = cond.StepDate;
+							}
+						}
+					}
+					// 录入某一个工点的工况，选择日期的时候不能小于最近一次录入日期（本地+服务器）
+					if (!now.compareDate(today, this.todayDate)) {
+						uni.showToast({
+							icon: 'none',
+							title: '选择日期不能小于最近一次录入日期',
+							mask: false,
+							duration: 1500
+						});
+						return;
+					}
 				}
 				// 生成工况的mode json用于提交
 				var mode = {
@@ -78,11 +115,15 @@
 					UploadDate: '', // 上传日期
 					CurrentSiteID: this.siteId, // 工点ID
 					Mark: this.Mark, // 补充说明
-					Title: this.conditionName, // 用于列表名称展示
-					Steps: [] ,//JSON.stringify()
+					conditionName: this.conditionName, // 用于列表名称展示
+					siteName: this.siteName, // 用于列表名称展示
+					Steps: [], //JSON.stringify()
 					Time: ''
 				}
-				var id = this.siteId,conMode = mode,checked = this.checked,listIndex = this.listIndex
+				var id = this.siteId,
+					conMode = mode,
+					checked = this.checked,
+					listIndex = this.listIndex
 				// 判断是新建工况还是检查工况 新建false：获取工点下分区，否则true获取当前工况下ID
 				if (this.checked) {
 					id = this.conditionMode.CurrentSiteID
@@ -105,8 +146,8 @@
 							//console.log("conMode => "+ JSON.stringify(conMode));
 							uni.navigateTo({
 								//url: './conditionPartition'
-								url: './conditionPartitionLeft?pointLists=' + JSON.stringify(succ.data) + 
-								'&conditionMode=' + JSON.stringify(conMode) + "&checked=" + checked + "&listIndex=" + listIndex
+								url: './conditionPartitionLeft?pointLists=' + JSON.stringify(succ.data) +
+									'&conditionMode=' + JSON.stringify(conMode) + "&checked=" + checked + "&listIndex=" + listIndex
 							})
 						} else {
 							console.log("获取分区失败 => " + succ.statusCode)
@@ -141,11 +182,36 @@
 			},
 			bindDateChange: function(e) {
 				this.todayDate = e.target.value
+			},
+			getLastUploadDate: function(siteID) {
+				// 获取某工点最后一次施工工况日期
+				uni.request({
+					url: service.SERVICE_URL + 'MCsp/GetLastUploadDate',
+					method: 'GET',
+					data: {
+						siteID: siteID
+					},
+					success: res => {
+						if (res.statusCode === 200) {
+							//console.log("date => "+ JSON.stringify(res.data));
+							service.setLastUploadDate(res.data)
+						} else {
+							console.log(res.statusCode)
+							uni.showToast({
+								icon: 'none',
+								title: '获取工点最后工况日期失败.'
+							})
+						}
+					},
+					fail: () => {
+						console.log("fail => 获取某工点最后一次施工工况日期失败.");
+					}
+				});
 			}
 		},
 		onLoad(load) {
-			this.todayDate = now.date;
-			this.endDate = now.date;
+			this.todayDate = now.date();
+			this.endDate = now.date();
 			this.username = service.getUsers().account;
 			this.startDate = service.getLastUploadDate();
 			if (undefined != load.conditionMode && "" != load.conditionMode) {
@@ -153,7 +219,8 @@
 				this.conditionMode = JSON.parse(load.conditionMode);
 				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode));
 				// this.conditionMode.Steps = JSON.parse(this.conditionMode.Steps)
-				this.conditionName = this.conditionMode.Title;
+				this.conditionName = this.conditionMode.conditionName;
+				this.siteName = this.conditionMode.siteName;
 				this.radioValue = this.conditionMode.Status;
 				this.todayDate = this.conditionMode.StepDate;
 				this.Mark = this.conditionMode.Mark;
@@ -171,13 +238,15 @@
 			var pages = getCurrentPages();
 			var page = pages[pages.length - 1]
 			if (undefined != page.data.point) {
-				this.conditionName = page.data.point;
+				this.conditionName = page.data.point.conditionName;
+				this.siteName = page.data.point.siteName;
 				//console.log(this.conditionName)
 				page.data.point = undefined;
 			}
 			if (undefined != page.data.siteId) {
 				this.siteId = page.data.siteId;
 				//console.log(this.siteId)
+				this.getLastUploadDate(page.data.siteId)
 				page.data.siteId = undefined;
 			}
 			var telsafe = service.SERVICE_URL.indexOf("telsafe.com");
@@ -243,5 +312,10 @@
 		font-style: normal;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+	}
+
+	.input_date_picker {
+		display: flex;
+		flex-direction: row;
 	}
 </style>

@@ -25,7 +25,10 @@
 						<view class="uni-list-cell" v-for="(item,index) in localList" :key="index">
 							<checkbox class="uni-list-cell-navigate-box" :value="index"></checkbox>
 							<view class="uni-list-cell-navigate uni-navigate-right" hover-class="uni-list-cell-hover" @click="conditionCheck(index,item)">
-								{{item.Title}}
+								<view class="title_body">
+									<view class="title_site">{{item.siteName}}</view>
+									<view class="title_cond">{{item.conditionName}}</view>
+								</view>
 								<view class="uni-list-cell-navigate-date">{{item.StepDate}}</view>
 							</view>
 						</view>
@@ -197,20 +200,26 @@
 								complete() {
 									_this.localList.splice(_this.localList.indexOf(list), 1);
 									_this.submitList.splice(0, 1);
-									var _localList = _this.localList;
-									if (0 < _localList.length) {
-										for (var i = 0; i < _localList.length; i++) {
-											_localList[i].checked = false;
+									service.removeAllCondition()
+									if (0 < _this.localList.length) {
+										for (var i = 0; i < _this.localList.length; i++) {
+											_this.localList[i].checked = false;
 										}
-										service.removeAllCondition()
-										for (var i = 0; i < _localList.length; i++) {
-											service.setAllCondition(_localList[i]);
+										for (var i = 0; i < _this.localList.length; i++) {
+											service.setAllCondition(_this.localList[i]);
 										}
 									}
 								}
 							})
 						}, 800)
 					}
+				} else {
+					uni.showToast({
+						icon: 'none',
+						title: '请检查工况.',
+						mask: false,
+						duration: 1500
+					});
 				}
 			},
 			uploadImage: function(imgs) {
@@ -313,27 +322,6 @@
 					})
 					return;
 				}
-				// 获取某工点最后一次施工工况日期
-				uni.request({
-					url: service.SERVICE_URL + 'MCsp/GetLastUploadDate',
-					method: 'GET',
-					data: {},
-					success: res => {
-						if (res.statusCode === 200) {
-							//console.log("date => "+ JSON.stringify(res.data));
-							service.setLastUploadDate(res.data)
-						} else {
-							console.log(res.statusCode)
-							uni.showToast({
-								icon: 'none',
-								title: '获取工点最后工况日期失败.'
-							})
-						}
-					},
-					fail: () => {
-						console.log("fail => 获取某工点最后一次施工工况日期失败.");
-					}
-				});
 				uni.navigateTo({
 					url: '../mypages/conditionAdd'
 				})
@@ -452,5 +440,24 @@
 		width: 500upx;
 		height: 500upx;
 		margin-top: 30upx;
+	}
+
+	.title_body {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.title_body .title_site {
+		font-size: 35upx;
+		padding: 0upx;
+		line-height: 30upx;
+	}
+	
+	.title_body .title_cond {
+		font-size: 27upx;
+		color: #919191;
+		margin-top: 5upx;
+		padding: 0upx;
+		line-height: 30upx;
 	}
 </style>

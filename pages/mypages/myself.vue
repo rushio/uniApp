@@ -65,15 +65,9 @@
 			//console.log("service.getUsers => "+ JSON.stringify(service.getUsers()));
 			if ("[]" === JSON.stringify(service.getUsers())) {
 				this.isLogin = false;
-				console.log("set login")
-				uni.reLaunch({
-					url: "./login"
-				})
 			} else {
-				this.isLogin = true;
 				this.userInfo = service.getUsers();
-				var log = "{\"account\":\"" + this.userInfo.account + "\",\"token\":\"" + this.userInfo.Token + "\"}"
-				console.log("get login => " + log)
+				this.isLogin = true;
 			}
 		}
 	}

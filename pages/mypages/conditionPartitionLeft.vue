@@ -9,7 +9,23 @@
 			</scroll-view>
 			<scroll-view class="nav-right" scroll-y :scroll-top="scrollTop" @scroll="scroll" :style="'height:'+height+'px'"
 			 scroll-with-animation>
-				<view class="uni-card">
+				<block v-for="(list,index) in subItemLists" :key="index">
+					<view v-show="list.items.length">
+						<view class="uni-list">
+							<view class="uni-list-cell uni-list-cell-navigate" hover-class="uni-list-cell-hover"
+							@click="toConditionCreate(item, list)" v-for="(item,key) in list.items" :key="key">
+								<view class="title_body">
+									<view class="title_site">{{item.name}}</view>
+									<view class="title_cond">{{list.name}}</view>
+								</view>
+								<view v-show="item.checked?true:false">
+									<uni-icon size="30" :type="'checkbox-filled'" :color="'#007aff'"></uni-icon>
+								</view>
+							</view>
+						</view>
+					</view>
+				</block>
+				<!-- <view class="uni-card">
 					<view class="uni-list">
 						<view class="uni-list-cell uni-collapse" v-for="(list,index) in subItemLists" :key="index" :class="index === subItemLists.length - 1 ? 'uni-list-cell-last' : ''">
 							<view class="uni-list-cell-navigate uni-navigate-bottom" hover-class="uni-list-cell-hover" :class="list.IsSite ? 'uni-active' : ''"
@@ -27,7 +43,7 @@
 							</view>
 						</view>
 					</view>
-				</view>
+				</view> -->
 			</scroll-view>
 		</view>
 		<view class="nav">
@@ -112,11 +128,17 @@
 					}
 				}
 			},
-			toConditionCreate(item, attributes) {
+			toConditionCreate(item, list) {
 				/**
 				 * item：表示工序
+				 * list 表示分部分项
 				 * attributes：表示工序的att
 				 */
+				var attributes = list.Data.Attributes
+				// 分部分项subitemid => id
+				this.subID = list.id;
+				// 分部分项名称subname
+				this.subName = list.name;
 				var step = { //JSON.stringify()
 					AreaID: this.partitionValue, // 分区id => Value
 					SubItemID: this.subID, //分部分项id
@@ -269,5 +291,28 @@
 
 	.item-checked {
 		background: #E097B4;
+	}
+	
+	.title_body {
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.title_body .title_site {
+		font-size: 35upx;
+		padding: 0upx;
+		line-height: 30upx;
+	}
+	
+	.title_body .title_cond {
+		font-size: 27upx;
+		color: #919191;
+		margin-top: 5upx;
+		padding: 0upx;
+		line-height: 30upx;
+	}
+	
+	.uni-list-icon {
+		
 	}
 </style>

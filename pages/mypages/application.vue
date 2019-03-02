@@ -11,9 +11,11 @@
 </template>
 
 <script>
+	import service from "../../common/service.js"
 	export default {
 		data() {
 			return {
+				userInfo: '',
 				gridList: [{
 					text: '施工工况',
 					icon: '../../static/img/risk_assessment.png'
@@ -33,6 +35,19 @@
 					default:
 						break;
 				}
+			}
+		},
+		onLoad() {
+			//console.log("service.getUsers => "+ JSON.stringify(service.getUsers()));
+			if ("[]" === JSON.stringify(service.getUsers())) {
+				console.log("set login")
+				uni.reLaunch({
+					url: "./login"
+				})
+			} else {
+				this.userInfo = service.getUsers();
+				var log = "{\"account\":\"" + this.userInfo.account + "\",\"token\":\"" + this.userInfo.Token + "\"}"
+				console.log("get login => " + log)
 			}
 		}
 	}

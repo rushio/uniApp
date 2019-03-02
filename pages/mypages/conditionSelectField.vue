@@ -55,11 +55,14 @@
 		},
 		methods: {
 			onSelectPoints: function(name,name2,site) {
-				var dian = name + ">" + name2 + ">" + site.SiteName;
+				var dian = name + ">" + name2;
 				var pages = getCurrentPages();
 				var page = pages[pages.length - 2]; // pages.length表示所有页数 -1表示当前页面 -2表示上一个页面
 				page.setData({
-					point: dian,
+					point: {
+						conditionName: dian,
+						siteName: site.SiteName
+					},
 					siteId: site.SiteID
 				})
 				uni.navigateBack({

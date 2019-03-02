@@ -86,7 +86,7 @@
 								// 储存工点信息
 								server.setPoints(object.data.Projects);
 								uni.switchTab({
-									url: './myself'
+									url: './application'
 								})
 							}
 						} else {
