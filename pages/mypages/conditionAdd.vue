@@ -194,7 +194,7 @@
 					success: res => {
 						if (res.statusCode === 200) {
 							//console.log("date => "+ JSON.stringify(res.data));
-							service.setLastUploadDate(res.data)
+							this.startDate = res.data;
 						} else {
 							console.log(res.statusCode)
 							uni.showToast({
@@ -209,32 +209,14 @@
 				});
 			}
 		},
-		onLoad(load) {
+		onShow() {
 			this.todayDate = now.date();
 			this.endDate = now.date();
-			this.username = service.getUsers().account;
-			this.startDate = service.getLastUploadDate();
-			if (undefined != load.conditionMode && "" != load.conditionMode) {
-				// 初始化工况要检查的数据
-				this.conditionMode = JSON.parse(load.conditionMode);
-				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode));
-				// this.conditionMode.Steps = JSON.parse(this.conditionMode.Steps)
-				this.conditionName = this.conditionMode.conditionName;
-				this.siteName = this.conditionMode.siteName;
-				this.radioValue = this.conditionMode.Status;
-				this.todayDate = this.conditionMode.StepDate;
-				this.Mark = this.conditionMode.Mark;
+			if (this.checked) {
+				uni.setNavigationBarTitle({
+					title: "检查工况"
+				})
 			}
-			if (undefined != load.checked && "" != load.checked) {
-				this.checked = load.checked;
-				//console.log("this.checked => "+ this.checked);
-			}
-			if (undefined != load.listIndex && "" != load.listIndex) {
-				this.listIndex = load.listIndex;
-				//console.log("this.listIndex => "+ this.listIndex);
-			}
-		},
-		onShow() {
 			var pages = getCurrentPages();
 			var page = pages[pages.length - 1]
 			if (undefined != page.data.point) {
@@ -255,6 +237,28 @@
 				this.isField = true;
 			} else {
 				this.isField = false;
+			}
+		},
+		onLoad(load) {
+			this.username = service.getUsers().account;
+			if (undefined != load.conditionMode && "" != load.conditionMode) {
+				// 初始化工况要检查的数据
+				this.conditionMode = JSON.parse(load.conditionMode);
+				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode));
+				// this.conditionMode.Steps = JSON.parse(this.conditionMode.Steps)
+				this.conditionName = this.conditionMode.conditionName;
+				this.siteName = this.conditionMode.siteName;
+				this.radioValue = this.conditionMode.Status;
+				this.todayDate = this.conditionMode.StepDate;
+				this.Mark = this.conditionMode.Mark;
+			}
+			if (undefined != load.checked && "" != load.checked) {
+				this.checked = load.checked;
+				//console.log("this.checked => "+ this.checked);
+			}
+			if (undefined != load.listIndex && "" != load.listIndex) {
+				this.listIndex = load.listIndex;
+				//console.log("this.listIndex => "+ this.listIndex);
 			}
 		}
 	}

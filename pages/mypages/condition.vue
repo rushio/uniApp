@@ -93,7 +93,7 @@
 					})
 				}
 			},
-			getUnitEngineerings() {
+			GetAllUnitEngineerings() {
 				// 获取所有单位工程
 				uni.request({
 					url: service.SERVICE_URL + 'MCsp/GetAllUnitEngineerings',
@@ -340,7 +340,7 @@
 			uniIcon
 		},
 		onLoad() {
-			this.getUnitEngineerings()
+			this.GetAllUnitEngineerings()
 		},
 		onShow() {
 			var pages = getCurrentPages();

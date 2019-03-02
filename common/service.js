@@ -63,21 +63,6 @@ const setUnitEngineeringLists = function(unit) {
 	uni.setStorageSync(UNIT_ENGINEERING, JSON.stringify(unit))
 }
 
-// 获取某工点最后一次施工工况日期
-const LASTUPLOADDATE = 'LASTUPLOADDATE';
-const getLastUploadDate = function() {
-	let ret = '';
-	ret = uni.getStorageSync(LASTUPLOADDATE);
-	if (!ret) {
-		ret = '0001-01-01';
-	}
-	return JSON.stringify(ret);
-}
-// 设置某工点最后一次施工工况日期
-const setLastUploadDate = function(date) {
-	uni.setStorageSync(LASTUPLOADDATE, JSON.stringify(date));
-}
-
 // 获取所有没有提交工况检查记录
 const ALLCONDITION = 'ALLCONDITION';
 const getAllCondition = function() {
@@ -150,8 +135,6 @@ export default {
 	getPoints,
 	setUnitEngineeringLists,
 	getUnitEngineeringLists,
-	setLastUploadDate,
-	getLastUploadDate,
 	setAllCondition,
 	getAllCondition,
 	removeAllCondition,
