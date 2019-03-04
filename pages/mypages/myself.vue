@@ -27,7 +27,7 @@
 					<view class="uni-list-item">{{ userInfo.Email!=null?userInfo.Email:'' }}</view>
 				</view>
 			</view>
-			<button type="primary" class="uer-sign-out" @click="bindSignOut()">退出登录</button>
+			<button class="uer-sign-out" type="primary"  @click="bindSignOut()">退出登录</button>
 		</view>
 	</view>
 </template>
@@ -142,7 +142,8 @@
 	}
 
 	.uer-sign-out {
-		width: 100%;
+		width: 98%;
 		margin-top: 50upx;
+		margin-left: 8upx;
 	}
 </style>

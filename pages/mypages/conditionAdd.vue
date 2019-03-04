@@ -132,6 +132,7 @@
 					conMode.StepDate = mode.StepDate
 					conMode.Mark = mode.Mark
 				}
+				this.getUnitEngineerings(conMode.CurrentSiteID, conMode.StepDate);
 				uni.request({
 					url: service.SERVICE_URL + 'MCsp/GetSiteAreas',
 					data: {
@@ -163,6 +164,23 @@
 							icon: 'none',
 							title: '请检查网络或服务.'
 						});
+					}
+				})
+			},
+			getUnitEngineerings: function(siteID, date) {
+				// 获取工点某一天的分项工程的填写
+				uni.request({
+					url: service.SERVICE_URL + 'MCsp/GetUnitEngineerings',
+					data: {
+						siteID: siteID, // 工点ID
+						date: date //施工工况填写日期
+					},
+					success(succ) {
+						//console.log("this.checkSubmitTaskList => " + JSON.stringify(succ.data));
+						service.setUnitEngineerings(succ.data);
+					},
+					fail() {
+						console.log("fail => 获取工点某一天的分项工程的填写失败.")
 					}
 				})
 			},

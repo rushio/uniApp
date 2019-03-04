@@ -126,6 +126,21 @@ const setUnitEngineerItems = function(unitItem) {
 	uni.setStorageSync(UNITENGINEERITEMS, JSON.stringify(unitItem));
 }
 
+// 获取工点某一天的分项工程的填写
+const UNITENGINEERINGS = 'UNITENGINEERINGS';
+const getUnitEngineerings = function() {
+	let ret = '';
+	ret = uni.getStorageSync(UNITENGINEERINGS);
+	if (!ret) {
+		ret = '[]';
+	}
+	return JSON.parse(ret);
+}
+// 保存工点某一天的分项工程的填写
+const setUnitEngineerings = function(unitEngineer) {
+	uni.setStorageSync(UNITENGINEERINGS, JSON.stringify(unitEngineer));
+}
+
 export default {
 	SERVICE_URL,
 	addUser,
@@ -142,5 +157,7 @@ export default {
 	getImgDataArr,
 	removeImgArr,
 	setUnitEngineerItems,
-	getUnitEngineerItems
+	getUnitEngineerItems,
+	setUnitEngineerings,
+	getUnitEngineerings
 }

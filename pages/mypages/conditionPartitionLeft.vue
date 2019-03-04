@@ -13,8 +13,8 @@
 					<view v-show="list.items.length">
 						<view class="uni-list">
 							<view class="uni-list-cell uni-list-cell-navigate" hover-class="uni-list-cell-hover"
-							@click="toConditionCreate(item, list)" v-for="(item,key) in list.items" :key="key"
-							:class="item.checked?'item-checked-bgc':''">
+							@click="!item.IsSite && toConditionCreate(item, list)" v-for="(item,key) in list.items" :key="key"
+							:class="item.IsSite?'item-checked-bgc':''">
 								<view class="title_body">
 									<view class="title_site">{{item.name}}</view>
 									<view class="title_cond">{{list.name}}</view>
@@ -201,76 +201,53 @@
 					delta: 2
 				})
 			},
-			getUnitEngineerings: function(siteID, date) {
-				// 获取工点某一天的分项工程的填写
-				uni.request({
-					url: service.SERVICE_URL + 'MCsp/GetUnitEngineerings',
-					data: {
-						siteID: siteID, // 工点ID
-						date: date //施工工况填写日期
-					},
-					success(succ) {
-						this.checkSubmitTaskList = succ.data;
-						console.log("this.checkSubmitTaskList size => " + this.checkSubmitTaskList.length);
-					},
-					fail() {
-						console.log("fail => 获取工点某一天的分项工程的填写失败.")
-					},
-					complete() {
-						// 根据服务器和本地工况集合检索当前的工况下的工序，生成工序集合
-						var localList = service.getAllCondition();
-						if (0 < localList.length) {
-							for (var i = 0; i < localList.length; i++) {
-								var local = localList[i];
-								if (siteID === local.CurrentSiteID && 0 < local.Steps.length) {
-									for (var j = 0; j < local.Steps.length; j++) {
-										var demo = {
-											AreaID : '',
-											SubItemID : '',
-											SubName : '',
-											TaskItemID : '',
-											StepID : '',
-											Name : '',
-											Status : ''
-										}
-										var step = local.Steps[j];
-										demo.AreaID = step.AreaID;
-										demo.SubItemID = step.SubItemID;
-										demo.SubName = step.SubName;
-										demo.TaskItemID = step.TaskItemID;
-										demo.StepID = local.CurrentSiteID
-										demo.Name = step.Name;
-										demo.Status = step.Status;
-										this.checkSubmitTaskList.push(demo);
-									}
-								}
-							}
-						}
-						console.log("this.checkSubmitTaskList size => " + this.checkSubmitTaskList.length);
-					}
-				})
-			},
 			checkUnitEngineerings: function(areaid) {
-				console.log("areaid => "+ areaid)
 				/* 
 				 * areaid 分区id
 				 */
+				// 根据服务器和本地工况集合检索当前的工况下的工序，生成工序集合
+				this.checkSubmitTaskList = service.getUnitEngineerings();
+				//console.log("this.checkSubmitTaskList => "+ JSON.stringify(this.checkSubmitTaskList));
+				var localList = service.getAllCondition();
+				if (0 < localList.length) {
+					for (var i = 0; i < localList.length; i++) {
+						var local = localList[i];
+						if (siteID === local.CurrentSiteID && 0 < local.Steps.length) {
+							for (var j = 0; j < local.Steps.length; j++) {
+								var demo = {
+									AreaID : '',
+									SubItemID : '',
+									SubName : '',
+									TaskItemID : '',
+									StepID : '',
+									Name : '',
+									Status : ''
+								}
+								var step = local.Steps[j];
+								demo.AreaID = step.AreaID;
+								demo.SubItemID = step.SubItemID;
+								demo.SubName = step.SubName;
+								demo.TaskItemID = step.TaskItemID;
+								demo.StepID = local.CurrentSiteID
+								demo.Name = step.Name;
+								demo.Status = step.Status;
+								this.checkSubmitTaskList.push(demo);
+							}
+						}
+					}
+				}
 				// 根据生成工序集合判断当前分区下的工序是否已检查，则背景色'灰'掉，而且不允许点击检查
 				if (0 < this.checkSubmitTaskList.length) {
-					console.log("length => "+ this.checkSubmitTaskList.length);
 					for (var i = 0; i < this.checkSubmitTaskList.length; i++) {
 						var taskItem = this.checkSubmitTaskList[i];
-						if (taskItem.AreaID === areaid && 0 < this.subItemLists.length) {
+						if (0 < this.subItemLists.length) {
 							for (var j = 0; j < this.subItemLists.length; j++) {
 								var subItem = this.subItemLists[j];
-								if (0 < subItem.items.length) {
-									for (var k = 0; k < subItem.items.length; k++) {
-										var item = subItem.items[k];
-										item.checked = false;
-										if (taskItem.TaskItemID = item.TaskItemID) {
-											item.checked = true;
-											console.log("item.TaskItemID => "+ item.TaskItemID);
-										}
+								for (var k = 0; k < subItem.items.length; k++) {
+									var item = subItem.items[k];
+									item.IsSite = false;
+									if (taskItem.AreaID === areaid && taskItem.TaskItemID === item.id) {
+										item.IsSite = true;
 									}
 								}
 							}
@@ -297,7 +274,6 @@
 			if (undefined != load.conditionMode && "" != load.conditionMode) {
 				this.conditionMode = JSON.parse(load.conditionMode)
 				//console.log("this.conditionMode => "+ JSON.stringify(this.conditionMode))
-				this.getUnitEngineerings(this.conditionMode.CurrentSiteID, this.conditionMode.StepDate);
 			}
 			// getUnitEngineeringLists获取本地的所有单位工程
 			this.unitEngineeringLists = service.getUnitEngineeringLists();
